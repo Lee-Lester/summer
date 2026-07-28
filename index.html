@@ -967,8 +967,8 @@
         const SECRET_PASSWORD = '0701';
 
         // 2. Supabase 配置（必填！）
-        const SUPABASE_URL = 'https://ldqauibuqwpwwtjoihjk.supabaseClient.co'; // 👈 替换为你的 Supabase URL
-        const SUPABASE_KEY = 'sb_publishable_udLhwN2b-iHKg4jSJU4pPw_VytNTYkr'; // 👈 替换为你的 Supabase anon key
+        const SUPABASE_URL = 'https://ldqauibuqwpwwtjoihjk.supabase.co'; // 👈 替换为你的 Supabase URL
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcWF1aWJ1cXdwd3d0am9paGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMjA5MjMsImV4cCI6MjEwMDc5NjkyM30.PxxJn1IKE4ck3WszrmPGr5gcL_j7wcmPjawHMbhlhcU'; // 👈 替换为你的 Supabase anon key
 
         // 3. 相识日期（用于计时器）
         const LOVE_START = new Date('2026-07-01T00:00:00');
@@ -978,7 +978,7 @@
         // ============================================================
 
         // ---- Supabase 客户端 ----
-        const supabaseClient = supabaseClient.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // ---- DOM 引用 ----
         const loginPage = document.getElementById('loginPage');
