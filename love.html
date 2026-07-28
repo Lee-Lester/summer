@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🔐 小亮 ❤️ 瑶瑶 · 秘密花园</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
+    <style>
+        /* ===== 全局重置 & 基础 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --rose: #e8878a;
+            --rose-dark: #c96b6e;
+            --rose-light: #f9e0de;
+            --text-dark: #4a3335;
+            --text-medium: #7a5c5e;
+            --white: #ffffff;
+            --shadow: 0 4px 20px rgba(180, 120, 130, 0.12);
+            --shadow-hover: 0 12px 32px rgba(140, 80, 90, 0.25);
+            --radius: 24px;
+        }
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(170deg, #fef5f0 0%, #fce8e6 20%, #fdf0ed 40%, #fef6f2 60%, #fbe9e7 80%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+        /* ===== 画布（花瓣&爱心粒子） ===== */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ===== 登录页 ===== */
+        #loginPage {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at 30% 40%, #fce4e1 0%, #f5d0cc 50%, #ebc0bb 100%);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        #loginPage.hidden {
+            opacity: 0;
+            transform: scale(1.05);
+            pointer-events: none;
+        }
+        .login-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: var(--radius);
+            padding: 44px 40px 40px;
+            max-width: 400px;
+            width: 92%;
+            box-shadow: 0 30px 60px rgba(140, 80, 90, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+            text-align: center;
+            position: relative;
+            animation: loginFloat 2s ease-in-out infinite alternate;
+        }
+        @keyframes loginFloat {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-10px);
+            }
+        }
+        .login-card .icon {
+            font-size: 56px;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .login-card h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #d4777a, #c06063);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+        .login-card .sub {
+            color: var(--text-medium);
+            font-size: 0.95rem;
+            margin-top: 4px;
+            letter-spacing: 2px;
+        }
+        .login-card .hint {
+            margin-top: 28px;
+            font-size: 0.9rem;
+            color: var(--text-medium);
+            background: rgba(255, 255, 255, 0.4);
+            padding: 10px 16px;
+            border-radius: 60px;
+            display: inline-block;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        .login-card .hint span {
+            font-weight: 600;
+            color: var(--rose-dark);
+        }
+        .login-card .input-group {
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .login-card input {
+            padding: 16px 20px;
+            border-radius: 60px;
+            border: 1.5px solid rgba(200, 160, 165, 0.3);
+            background: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+            text-align: center;
+            letter-spacing: 4px;
+            outline: none;
+            transition: 0.3s;
+            font-family: inherit;
+            backdrop-filter: blur(4px);
+        }
+        .login-card input:focus {
+            border-color: var(--rose);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 4px rgba(232, 135, 138, 0.15);
+        }
+        .login-card .login-btn {
+            padding: 16px;
+            border: none;
+            border-radius: 60px;
+            background: linear-gradient(135deg, #e8878a, #d47073);
+            color: white;
+            font-size: 1.15rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 6px 20px rgba(200, 110, 115, 0.3);
+            letter-spacing: 2px;
+        }
+        .login-card .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(200, 110, 115, 0.45);
+        }
+        .login-card .login-btn:active {
+            transform: scale(0.97);
+        }
+        .login-card .error-msg {
+            color: #d47073;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            min-height: 24px;
+            font-weight: 500;
+            opacity: 0;
+            transition: 0.3s;
+        }
+        .login-card .error-msg.show {
+            opacity: 1;
+        }
+        .login-card .footer-text {
+            margin-top: 24px;
+            font-size: 0.75rem;
+            color: var(--text-medium);
+            opacity: 0.6;
+            letter-spacing: 1px;
+        }
+
+        /* ===== 主应用容器 ===== */
+        #app {
+            position: relative;
+            z-index: 1;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+        #app.visible {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ===== 场景切换 ===== */
+        .scene {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            transition: 0.4s;
+        }
+        .front {
+            display: flex;
+        }
+        .back {
+            display: none;
+        }
+        .front.hidden {
+            display: none;
+        }
+        .back.visible {
+            display: flex;
+        }
+
+        /* ===== 首页 ===== */
+        .hero-icon {
+            font-size: 56px;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            15% {
+                transform: translateY(-18px);
+            }
+            30% {
+                transform: translateY(0);
+            }
+            45% {
+                transform: translateY(-8px);
+            }
+        }
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 18px 0;
+            background: linear-gradient(135deg, #d4777a, #c06063);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .timer-box {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            padding: 20px 30px;
+            margin: 20px auto;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            max-width: 500px;
+            flex-wrap: wrap;
+        }
+        .timer-block {
+            text-align: center;
+            min-width: 56px;
+        }
+        .timer-num {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--rose-dark);
+            font-variant-numeric: tabular-nums;
+        }
+        .timer-label {
+            font-size: 0.8rem;
+            color: var(--text-medium);
+        }
+
+        .photos {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .polaroid {
+            background: white;
+            padding: 10px 10px 25px;
+            border-radius: 6px;
+            box-shadow: var(--shadow);
+            transition: 0.3s;
+            transform: rotate(var(--r, 0));
+            cursor: default;
+        }
+        .polaroid:nth-child(1) {
+            --r: -2deg;
+        }
+        .polaroid:nth-child(2) {
+            --r: 2deg;
+        }
+        .polaroid:nth-child(3) {
+            --r: 2.5deg;
+        }
+        .polaroid:nth-child(4) {
+            --r: -1.5deg;
+        }
+        .polaroid:hover {
+            transform: rotate(0) translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+        .polaroid img {
+            width: 100%;
+            aspect-ratio: 4/5;
+            object-fit: cover;
+            border-radius: 3px;
+            background: #f5f0ed;
+        }
+        .polaroid p {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: var(--text-medium);
+        }
+        .enter-btn {
+            margin: 30px 0;
+            padding: 14px 40px;
+            border: none;
+            border-radius: 60px;
+            background: linear-gradient(135deg, #e8878a, #d47073);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(200, 110, 115, 0.3);
+            transition: 0.3s;
+        }
+        .enter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(200, 110, 115, 0.45);
+        }
+
+        /* ===== 秘密花园 ===== */
+        .garden-header {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .garden-header .brand {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--rose-dark);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 30px;
+            padding: 4px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 8px 18px;
+            border-radius: 30px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            color: var(--text-medium);
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        .tab.active {
+            background: white;
+            color: var(--rose-dark);
+            box-shadow: 0 2px 8px rgba(180, 100, 110, 0.15);
+        }
+        .back-btn {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(200, 160, 165, 0.3);
+            border-radius: 30px;
+            padding: 6px 18px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-medium);
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+        .back-btn:hover {
+            background: white;
+            border-color: var(--rose);
+        }
+
+        .panel {
+            display: none;
+            animation: fadeUp 0.3s ease;
+        }
+        .panel.active {
+            display: block;
+        }
+        @keyframes fadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+        .btn {
+            padding: 8px 20px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            background: white;
+            color: var(--text-dark);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            font-size: 0.9rem;
+        }
+        .btn.primary {
+            background: linear-gradient(135deg, #e8878a, #d47073);
+            color: white;
+        }
+        .btn.primary:hover {
+            box-shadow: 0 6px 16px rgba(200, 110, 115, 0.4);
+            transform: translateY(-1px);
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--rose);
+            color: var(--rose-dark);
+        }
+        .btn-outline:hover {
+            background: var(--rose);
+            color: white;
+        }
+        .btn-sm {
+            padding: 4px 14px;
+            font-size: 0.8rem;
+        }
+
+        .mood-selector {
+            display: flex;
+            gap: 12px;
+            font-size: 2rem;
+            cursor: pointer;
+            flex-wrap: wrap;
+        }
+        .mood {
+            opacity: 0.5;
+            transition: 0.2s;
+            filter: grayscale(0.3);
+        }
+        .mood.selected {
+            transform: scale(1.2);
+            opacity: 1;
+            filter: grayscale(0);
+            text-shadow: 0 2px 12px rgba(200, 110, 115, 0.3);
+        }
+        textarea,
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1.5px solid rgba(200, 160, 165, 0.25);
+            background: rgba(255, 255, 255, 0.8);
+            font-family: inherit;
+            outline: none;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+        textarea:focus,
+        input:focus {
+            border-color: var(--rose);
+            box-shadow: 0 0 0 4px rgba(232, 135, 138, 0.1);
+        }
+        .file-upload {
+            border: 2px dashed rgba(200, 160, 165, 0.35);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.5);
+            margin-top: 12px;
+            transition: 0.2s;
+        }
+        .file-upload:hover {
+            border-color: var(--rose);
+            background: rgba(255, 255, 255, 0.7);
+        }
+        .preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .preview-item {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f5f0ed;
+            border: 1px solid rgba(200, 160, 165, 0.2);
+        }
+        .preview-item img,
+        .preview-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .preview-item .del {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            background: rgba(0, 0, 0, 0.55);
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            text-align: center;
+            line-height: 22px;
+            font-size: 14px;
+            backdrop-filter: blur(4px);
+            transition: 0.2s;
+        }
+        .preview-item .del:hover {
+            background: rgba(200, 70, 70, 0.8);
+            transform: scale(1.1);
+        }
+
+        .check-item,
+        .wish-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(200, 160, 165, 0.15);
+        }
+        .check-item:last-child,
+        .wish-item:last-child {
+            border-bottom: none;
+        }
+        .check-star,
+        .wish-star {
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+            user-select: none;
+            min-width: 40px;
+            text-align: center;
+        }
+        .check-star:hover,
+        .wish-star:hover {
+            transform: scale(1.15);
+        }
+
+        .msg-bubble {
+            background: white;
+            border-radius: 16px 16px 16px 4px;
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border-left: 4px solid var(--rose-light);
+        }
+        .msg-bubble strong {
+            color: var(--rose-dark);
+        }
+        .msg-bubble small {
+            color: var(--text-medium);
+            font-size: 0.75rem;
+            margin-left: 8px;
+        }
+        .msg-bubble p {
+            margin-top: 4px;
+            word-break: break-word;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .filter-btn {
+            padding: 6px 18px;
+            border-radius: 30px;
+            border: 1.5px solid rgba(200, 160, 165, 0.2);
+            background: transparent;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-medium);
+            transition: 0.2s;
+            font-size: 0.85rem;
+        }
+        .filter-btn.active {
+            background: var(--rose);
+            color: white;
+            border-color: var(--rose);
+        }
+        .filter-btn:hover:not(.active) {
+            border-color: var(--rose);
+            background: rgba(232, 135, 138, 0.08);
+        }
+
+        .gallery-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+        .gallery-item {
+            width: 120px;
+            background: white;
+            border-radius: 14px;
+            padding: 8px;
+            box-shadow: var(--shadow);
+            transition: 0.3s;
+            overflow: hidden;
+        }
+        .gallery-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+        .gallery-item .thumb {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #f5f0ed;
+        }
+        .gallery-item .name {
+            font-size: 0.7rem;
+            color: var(--text-medium);
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ===== 音乐按钮 ===== */
+        .music-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: 0.3s;
+            border: none;
+            user-select: none;
+        }
+        .music-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px rgba(200, 110, 115, 0.25);
+        }
+        .music-btn.playing {
+            background: var(--rose);
+            color: white;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 700px) {
+            .timer-box {
+                gap: 10px;
+                padding: 16px 20px;
+            }
+            .timer-block {
+                min-width: 40px;
+            }
+            .timer-num {
+                font-size: 1.6rem;
+            }
+            .photos {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            .hero-title {
+                font-size: 1.8rem;
+            }
+            .garden-header {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 16px;
+            }
+            .garden-header .brand {
+                justify-content: center;
+            }
+            .tabs {
+                justify-content: center;
+            }
+            .tab {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            .login-card {
+                padding: 32px 24px 28px;
+            }
+            .login-card h1 {
+                font-size: 1.6rem;
+            }
+            .gallery-item {
+                width: 100px;
+            }
+            .gallery-item .thumb {
+                height: 64px;
+            }
+            .back-btn {
+                align-self: center;
+            }
+        }
+        @media (max-width: 440px) {
+            .photos {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .polaroid {
+                padding: 6px 6px 18px;
+            }
+            .polaroid p {
+                font-size: 0.7rem;
+            }
+            .timer-box {
+                padding: 12px 14px;
+                gap: 6px;
+            }
+            .timer-block {
+                min-width: 32px;
+            }
+            .timer-num {
+                font-size: 1.3rem;
+            }
+            .timer-label {
+                font-size: 0.65rem;
+            }
+            .hero-title {
+                font-size: 1.5rem;
+            }
+            .enter-btn {
+                padding: 12px 28px;
+                font-size: 1rem;
+            }
+            .garden-header .brand {
+                font-size: 1.1rem;
+            }
+            .tab {
+                font-size: 0.7rem;
+                padding: 4px 10px;
+            }
+            .card {
+                padding: 14px;
+            }
+        }
+
+        /* ===== 爱心飘浮动画（点击） ===== */
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-180px) scale(1.6) rotate(30deg);
+            }
+        }
+
+        /* ===== 滚动条美化 ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(200, 160, 165, 0.08);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--rose-light);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--rose);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 粒子画布 ===== -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- ===== 音乐控制 ===== -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="./music.mp3" type="audio/mpeg" />
+        您的浏览器不支持音频播放。
+    </audio>
+    <button class="music-btn" id="musicToggle" title="播放音乐">🎵</button>
+
+    <!-- ===== 登录页 ===== -->
+    <div id="loginPage">
+        <div class="login-card">
+            <span class="icon">🔐</span>
+            <h1>秘密花园</h1>
+            <p class="sub">只属于小亮 ❤️ 瑶瑶的世界</p>
+            <div class="hint">💌 请输入 <span>我们的纪念日</span></div>
+            <div class="input-group">
+                <input type="password" id="passwordInput" placeholder="· · · ·" maxlength="10" autocomplete="off" />
+                <button class="login-btn" id="loginBtn">🌸 开启花园</button>
+                <div class="error-msg" id="loginError">💔 密码不对哦，再想想～</div>
+            </div>
+            <p class="footer-text">🌹 2026 · 7 · 1  ·   forever</p>
+        </div>
+    </div>
+
+    <!-- ===== 主应用 ===== -->
+    <div id="app">
+        <!-- ===== 首页 ===== -->
+        <div id="frontScene" class="scene front">
+            <div style="max-width:700px; width:100%;">
+                <div style="text-align:center; padding-top:30px;">
+                    <span class="hero-icon">💝</span>
+                    <h1 class="hero-title">致我最爱的瑶瑶</h1>
+                    <p style="color:var(--text-medium);">遇见你，是小亮此生最美的意外 ✨</p>
+                </div>
+                <div class="timer-box" id="timer">
+                    <div class="timer-block"><span class="timer-num" id="tDays">0</span><span class="timer-label">天</span></div>
+                    <div class="timer-block"><span class="timer-num" id="tHours">00</span><span class="timer-label">时</span></div>
+                    <div class="timer-block"><span class="timer-num" id="tMins">00</span><span class="timer-label">分</span></div>
+                    <div class="timer-block"><span class="timer-num" id="tSecs">00</span><span class="timer-label">秒</span></div>
+                </div>
+                <div class="photos">
+                    <div class="polaroid"><img src="./princess.jpg" alt="Princess" onerror="this.style.display='none'" /><p>我的小公主 👑</p></div>
+                    <div class="polaroid"><img src="./smile.jpg" alt="Smile" onerror="this.style.display='none'" /><p>你的笑容 ☀️</p></div>
+                    <div class="polaroid"><img src="./smirk.jpg" alt="Smirk" onerror="this.style.display='none'" /><p>可爱的坏笑 😏</p></div>
+                    <div class="polaroid"><img src="./beam.jpg" alt="Beam" onerror="this.style.display='none'" /><p>光芒万丈 ✨</p></div>
+                </div>
+                <div style="text-align:center; margin:20px 0;">
+                    <button id="heartBtn" style="background:none;border:none;font-size:36px;cursor:pointer;animation:pulse 1.8s infinite;">❤️</button>
+                    <p id="heartCountDisplay" style="color:var(--text-medium);">收到了 0 颗爱心</p>
+                </div>
+                <div style="text-align:center;">
+                    <button class="enter-btn" id="enterGarden">🌸 进入我们的秘密花园</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 秘密花园 ===== -->
+        <div id="gardenScene" class="scene back">
+            <div style="max-width:1000px; width:100%;">
+                <div class="garden-header">
+                    <span class="brand">🌸 秘密花园</span>
+                    <div class="tabs" id="mainTabs">
+                        <button class="tab active" data-tab="diary">📝 日记</button>
+                        <button class="tab" data-tab="checkin">☑️ 打卡</button>
+                        <button class="tab" data-tab="wishes">🌟 心愿</button>
+                        <button class="tab" data-tab="messages">💌 留言</button>
+                        <button class="tab" data-tab="gallery">🖼️ 回忆盒</button>
+                    </div>
+                    <button class="back-btn" id="backToFront">🏠 返回</button>
+                </div>
+
+                <!-- 日记 -->
+                <div id="panel-diary" class="panel active">
+                    <div class="card">
+                        <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px; flex-wrap:wrap;">
+                            <span style="font-weight:600;">心情</span>
+                            <div class="mood-selector" id="moodSel">
+                                <span class="mood selected" data-mood="🥰">🥰</span>
+                                <span class="mood" data-mood="😊">😊</span>
+                                <span class="mood" data-mood="😢">😢</span>
+                                <span class="mood" data-mood="😤">😤</span>
+                                <span class="mood" data-mood="🎉">🎉</span>
+                            </div>
+                        </div>
+                        <textarea id="diaryContent" rows="4" placeholder="今天发生了什么甜蜜的事…"></textarea>
+                        <div class="file-upload" id="fileUploadTrigger">📎 点击上传照片 / 视频 / 音频 / 文档</div>
+                        <input type="file" id="fileInput" multiple accept="*" style="display:none;" />
+                        <div class="preview" id="filePreview"></div>
+                        <div style="text-align:right; margin-top:15px; display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
+                            <button class="btn btn-outline btn-sm" id="cancelEditBtn" style="display:none;">取消</button>
+                            <button class="btn primary" id="saveDiaryBtn">💾 保存日记</button>
+                        </div>
+                    </div>
+                    <div id="diaryList"></div>
+                </div>
+
+                <!-- 打卡 -->
+                <div id="panel-checkin" class="panel">
+                    <div class="card" style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <input type="text" id="newCheckItem" placeholder="新建打卡项目，例如：早安吻 💋" style="flex:1; min-width:160px;" />
+                        <button class="btn primary" id="addCheckBtn">➕ 添加</button>
+                    </div>
+                    <div id="checkinList"></div>
+                </div>
+
+                <!-- 心愿 -->
+                <div id="panel-wishes" class="panel">
+                    <div class="card" style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <input type="text" id="newWish" placeholder="写下想一起做的事…" style="flex:1; min-width:160px;" />
+                        <button class="btn primary" id="addWishBtn">➕ 添加</button>
+                    </div>
+                    <div id="wishList"></div>
+                </div>
+
+                <!-- 留言 -->
+                <div id="panel-messages" class="panel">
+                    <div class="card" style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <input type="text" id="newMsg" placeholder="给 Ta 写句话…" style="flex:1; min-width:160px;" />
+                        <button class="btn primary" id="sendMsgBtn">📨 发送</button>
+                    </div>
+                    <div id="msgList"></div>
+                </div>
+
+                <!-- 回忆盒 -->
+                <div id="panel-gallery" class="panel">
+                    <div class="filter-group">
+                        <button class="filter-btn active" data-type="all">全部</button>
+                        <button class="filter-btn" data-type="image">🖼️ 图片</button>
+                        <button class="filter-btn" data-type="video">🎬 视频</button>
+                        <button class="filter-btn" data-type="audio">🎵 音频</button>
+                        <button class="filter-btn" data-type="other">📄 文档</button>
+                    </div>
+                    <div id="galleryGrid" class="gallery-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  🔐 配 置 区  ——  请 按 照 说 明 修 改
+        // ============================================================
+
+        // 1. 登录密码（默认：相识日 0701）
+        const SECRET_PASSWORD = '0701';
+
+        // 2. Supabase 配置（必填！）
+        const SUPABASE_URL = 'https://ldqauibuqwpwwtjoihjk.supabase.co'; // 👈 替换为你的 Supabase URL
+        const SUPABASE_KEY = 'sb_publishable_udLhwN2b-iHKg4jSJU4pPw_VytNTYkr'; // 👈 替换为你的 Supabase anon key
+
+        // 3. 相识日期（用于计时器）
+        const LOVE_START = new Date('2026-07-01T00:00:00');
+
+        // ============================================================
+        //  🚀 以 下 代 码 无 需 修 改
+        // ============================================================
+
+        // ---- Supabase 客户端 ----
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ---- DOM 引用 ----
+        const loginPage = document.getElementById('loginPage');
+        const app = document.getElementById('app');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+
+        // ---- 登录逻辑 ----
+        function checkAuth() {
+            const saved = localStorage.getItem('secret_garden_auth');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.expiry && Date.now() < data.expiry) {
+                        return true;
+                    }
+                } catch (_) { /* ignore */ }
+            }
+            return false;
+        }
+
+        function setAuth() {
+            const expiry = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 天
+            localStorage.setItem('secret_garden_auth', JSON.stringify({ expiry }));
+        }
+
+        function clearAuth() {
+            localStorage.removeItem('secret_garden_auth');
+        }
+
+        function doLogin() {
+            const input = passwordInput.value.trim();
+            if (input === SECRET_PASSWORD) {
+                setAuth();
+                loginPage.classList.add('hidden');
+                app.classList.add('visible');
+                document.body.style.overflow = 'auto';
+                // 初始化所有内容
+                initApp();
+                // 尝试播放音乐
+                tryPlayMusic();
+                loginError.classList.remove('show');
+                passwordInput.value = '';
+                passwordInput.blur();
+            } else {
+                loginError.classList.add('show');
+                passwordInput.value = '';
+                passwordInput.focus();
+                setTimeout(() => loginError.classList.remove('show'), 3000);
+            }
+        }
+
+        // 回车登录
+        passwordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') doLogin();
+        });
+        loginBtn.addEventListener('click', doLogin);
+
+        // ---- 自动登录检测 ----
+        if (checkAuth()) {
+            loginPage.classList.add('hidden');
+            app.classList.add('visible');
+            document.body.style.overflow = 'auto';
+            // 等 DOM 渲染完成再初始化
+            setTimeout(() => initApp(), 100);
+            setTimeout(tryPlayMusic, 300);
+        } else {
+            loginPage.classList.remove('hidden');
+            app.classList.remove('visible');
+            document.body.style.overflow = 'hidden';
+            // 聚焦输入框
+            setTimeout(() => passwordInput.focus(), 400);
+        }
+
+        // ---- 尝试自动播放音乐 ----
+        function tryPlayMusic() {
+            const bgMusic = document.getElementById('bgMusic');
+            const musicBtn = document.getElementById('musicToggle');
+            bgMusic.play().then(() => {
+                musicBtn.textContent = '🎶';
+                musicBtn.classList.add('playing');
+            }).catch(() => {});
+        }
+
+        // ---- 音乐控制 ----
+        const bgMusic = document.getElementById('bgMusic');
+        const musicBtn = document.getElementById('musicToggle');
+        let musicPlaying = false;
+        musicBtn.addEventListener('click', () => {
+            if (musicPlaying) {
+                bgMusic.pause();
+                musicBtn.textContent = '🎵';
+                musicBtn.classList.remove('playing');
+            } else {
+                bgMusic.play().catch(() => alert('请先点击页面任意位置，然后再播放音乐'));
+                musicBtn.textContent = '🎶';
+                musicBtn.classList.add('playing');
+            }
+            musicPlaying = !musicPlaying;
+        });
+
+        // ---- 应用初始化 ----
+        let currentEditId = null;
+        let pendingFiles = [];
+
+        function initApp() {
+            updateTimer();
+            setInterval(updateTimer, 1000);
+            loadHearts();
+            setupSceneSwitch();
+            setupTabs();
+            setupDiary();
+            setupCheckin();
+            setupWishes();
+            setupMessages();
+            setupGallery();
+            refreshAll();
+            setupHeartButton();
+        }
+
+        // ---- 计时器 ----
+        function updateTimer() {
+            const diff = Math.max(0, Date.now() - LOVE_START);
+            document.getElementById('tDays').textContent = Math.floor(diff / 86400000);
+            document.getElementById('tHours').textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
+            document.getElementById('tMins').textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+            document.getElementById('tSecs').textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+        }
+
+        // ---- 爱心 ----
+        function loadHearts() {
+            const hearts = parseInt(localStorage.getItem('love_hearts') || '0');
+            document.getElementById('heartCountDisplay').textContent = `收到了 ${hearts} 颗爱心`;
+        }
+
+        function setupHeartButton() {
+            document.getElementById('heartBtn').onclick = function(e) {
+                let hearts = parseInt(localStorage.getItem('love_hearts') || '0');
+                hearts++;
+                localStorage.setItem('love_hearts', hearts);
+                document.getElementById('heartCountDisplay').textContent = `收到了 ${hearts} 颗爱心`;
+                // 漂浮爱心特效
+                const emojis = ['❤️', '💕', '💗', '💖', '💘', '🌸', '🌺'];
+                for (let i = 0; i < 10; i++) {
+                    let el = document.createElement('span');
+                    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    el.style.position = 'fixed';
+                    el.style.left = (e.clientX + (Math.random() - 0.5) * 60) + 'px';
+                    el.style.top = (e.clientY + (Math.random() - 0.5) * 40) + 'px';
+                    el.style.fontSize = (18 + Math.random() * 28) + 'px';
+                    el.style.pointerEvents = 'none';
+                    el.style.zIndex = '9999';
+                    el.style.animation = 'floatUp 1.6s ease-out forwards';
+                    document.body.appendChild(el);
+                    setTimeout(() => el.remove(), 1700);
+                }
+            };
+        }
+
+        // ---- 场景切换 ----
+        function setupSceneSwitch() {
+            document.getElementById('enterGarden').onclick = () => {
+                document.getElementById('frontScene').classList.add('hidden');
+                document.getElementById('gardenScene').classList.add('visible');
+                refreshAll();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            document.getElementById('backToFront').onclick = () => {
+                document.getElementById('gardenScene').classList.remove('visible');
+                document.getElementById('frontScene').classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+        }
+
+        // ---- 标签页 ----
+        function setupTabs() {
+            document.querySelectorAll('#mainTabs .tab').forEach(t => {
+                t.addEventListener('click', () => {
+                    document.querySelectorAll('#mainTabs .tab').forEach(bt => bt.classList.remove('active'));
+                    t.classList.add('active');
+                    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                    const panel = document.getElementById('panel-' + t.dataset.tab);
+                    if (panel) panel.classList.add('active');
+                    // 切换时刷新对应数据
+                    const map = {
+                        diary: loadDiaries,
+                        checkin: loadCheckins,
+                        wishes: loadWishes,
+                        messages: loadMessages,
+                        gallery: () => loadGallery(document.querySelector('.filter-btn.active')?.dataset.type || 'all')
+                    };
+                    if (map[t.dataset.tab]) map[t.dataset.tab]();
+                });
+            });
+        }
+
+        // ---- 工具：base64 转 Blob ----
+        function base64ToBlob(b64) {
+            const parts = b64.split(',');
+            const mime = parts[0].match(/:(.*?);/)[1];
+            const bytes = atob(parts[1]);
+            const ab = new ArrayBuffer(bytes.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < bytes.length; i++) ia[i] = bytes.charCodeAt(i);
+            return new Blob([ab], { type: mime });
+        }
+
+        // ---- 日记 ----
+        function setupDiary() {
+            // 心情选择
+            document.querySelectorAll('.mood').forEach(m => {
+                m.onclick = () => {
+                    document.querySelectorAll('.mood').forEach(x => x.classList.remove('selected'));
+                    m.classList.add('selected');
+                };
+            });
+            // 文件上传
+            document.getElementById('fileUploadTrigger').onclick = () => document.getElementById('fileInput').click();
+            document.getElementById('fileInput').onchange = (e) => {
+                for (let file of e.target.files) {
+                    pendingFiles.push(file);
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const div = document.createElement('div');
+                        div.className = 'preview-item';
+                        if (file.type.startsWith('image/')) {
+                            div.innerHTML = `<img src="${ev.target.result}" /><span class="del">×</span>`;
+                        } else if (file.type.startsWith('video/')) {
+                            div.innerHTML = `<video src="${ev.target.result}"></video><span class="del">×</span>`;
+                        } else if (file.type.startsWith('audio/')) {
+                            div.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:28px;">🎵</div><span class="del">×</span>`;
+                        } else {
+                            div.innerHTML =
+                                `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:28px;">📄</div><span class="del">×</span>`;
+                        }
+                        div.querySelector('.del').onclick = (ev2) => {
+                            ev2.stopPropagation();
+                            const idx = pendingFiles.indexOf(file);
+                            if (idx > -1) pendingFiles.splice(idx, 1);
+                            div.remove();
+                        };
+                        document.getElementById('filePreview').appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                }
+                e.target.value = '';
+            };
+            // 保存
+            document.getElementById('saveDiaryBtn').onclick = saveDiary;
+            document.getElementById('cancelEditBtn').onclick = resetDiaryForm;
+        }
+
+        async function saveDiary() {
+            const mood = document.querySelector('.mood.selected')?.dataset.mood || '🥰';
+            const content = document.getElementById('diaryContent').value.trim();
+            if (!content && pendingFiles.length === 0) {
+                alert('写点什么吧～ 📝');
+                return;
+            }
+            const files = [];
+            for (let f of pendingFiles) {
+                const data = await new Promise(r => {
+                    const rd = new FileReader();
+                    rd.onload = () => r(rd.result);
+                    rd.readAsDataURL(f);
+                });
+                files.push({ name: f.name, type: f.type, data });
+            }
+            const diary = { mood, content, files };
+            try {
+                if (currentEditId) {
+                    await supabase.from('diaries').update(diary).eq('id', currentEditId);
+                } else {
+                    await supabase.from('diaries').insert([diary]);
+                }
+                resetDiaryForm();
+                loadDiaries();
+            } catch (err) {
+                alert('保存失败，请检查 Supabase 配置：' + err.message);
+            }
+        }
+
+        function resetDiaryForm() {
+            document.getElementById('diaryContent').value = '';
+            pendingFiles = [];
+            document.getElementById('filePreview').innerHTML = '';
+            document.querySelectorAll('.mood').forEach(m => m.classList.remove('selected'));
+            const first = document.querySelector('.mood');
+            if (first) first.classList.add('selected');
+            currentEditId = null;
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            document.getElementById('saveDiaryBtn').textContent = '💾 保存日记';
+        }
+
+        async function loadDiaries() {
+            const container = document.getElementById('diaryList');
+            try {
+                const { data } = await supabase.from('diaries').select('*').order('created_at', { ascending: false });
+                container.innerHTML = data?.length ? '' : '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有日记～ 写下第一篇吧 📝</p>';
+                data?.forEach(d => {
+                    let filesHtml = '';
+                    if (d.files) {
+                        d.files.forEach(f => {
+                            if (f.type?.startsWith('image/')) {
+                                filesHtml +=
+                                    `<img src="${f.data}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin:2px;" />`;
+                            } else if (f.type?.startsWith('video/')) {
+                                filesHtml +=
+                                    `<span style="font-size:24px;display:inline-block;width:56px;text-align:center;">🎬</span>`;
+                            } else if (f.type?.startsWith('audio/')) {
+                                filesHtml +=
+                                    `<span style="font-size:24px;display:inline-block;width:56px;text-align:center;">🎵</span>`;
+                            } else {
+                                filesHtml +=
+                                    `<span style="font-size:24px;display:inline-block;width:56px;text-align:center;">📄</span>`;
+                            }
+                        });
+                    }
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+                            <span style="font-size:2rem;">${d.mood || '🥰'}</span>
+                            <small style="color:var(--text-medium);">${new Date(d.created_at).toLocaleString()}</small>
+                        </div>
+                        <p style="white-space:pre-wrap;margin:8px 0;word-break:break-word;">${d.content || ''}</p>
+                        ${filesHtml ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0;">${filesHtml}</div>` : ''}
+                        <div style="text-align:right;margin-top:10px;display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
+                            <button class="btn btn-sm btn-outline edit-btn" data-id="${d.id}">✏️ 编辑</button>
+                            <button class="btn btn-sm" style="background:#f0d3d5;color:var(--text-medium);" data-id="${d.id}">🗑️ 删除</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+                // 编辑
+                document.querySelectorAll('.edit-btn').forEach(b => {
+                    b.onclick = async (e) => {
+                        const id = e.target.dataset.id;
+                        const { data } = await supabase.from('diaries').select('*').eq('id', id).single();
+                        if (data) editDiary(data);
+                    };
+                });
+                // 删除
+                document.querySelectorAll('.edit-btn + .btn').forEach(b => {
+                    b.onclick = async (e) => {
+                        if (confirm('确定要删除这篇日记吗？')) {
+                            await supabase.from('diaries').delete().eq('id', e.target.dataset.id);
+                            loadDiaries();
+                        }
+                    };
+                });
+            } catch (err) {
+                container.innerHTML = `<p style="text-align:center;color:var(--rose-dark);">⚠️ 加载失败，请检查 Supabase 配置</p>`;
+            }
+        }
+
+        function editDiary(diary) {
+            document.getElementById('diaryContent').value = diary.content || '';
+            document.querySelectorAll('.mood').forEach(m => m.classList.remove('selected'));
+            const moodEl = document.querySelector(`.mood[data-mood="${diary.mood}"]`);
+            if (moodEl) moodEl.classList.add('selected');
+            pendingFiles = [];
+            document.getElementById('filePreview').innerHTML = '';
+            if (diary.files) {
+                diary.files.forEach(f => {
+                    const file = new File([base64ToBlob(f.data)], f.name, { type: f.type });
+                    pendingFiles.push(file);
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    if (f.type?.startsWith('image/')) {
+                        div.innerHTML = `<img src="${f.data}" /><span class="del">×</span>`;
+                    } else if (f.type?.startsWith('video/')) {
+                        div.innerHTML = `<video src="${f.data}"></video><span class="del">×</span>`;
+                    } else {
+                        div.innerHTML =
+                            `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:28px;">📄</div><span class="del">×</span>`;
+                    }
+                    div.querySelector('.del').onclick = (ev2) => {
+                        ev2.stopPropagation();
+                        const idx = pendingFiles.indexOf(file);
+                        if (idx > -1) pendingFiles.splice(idx, 1);
+                        div.remove();
+                    };
+                    document.getElementById('filePreview').appendChild(div);
+                });
+            }
+            currentEditId = diary.id;
+            document.getElementById('cancelEditBtn').style.display = 'inline-block';
+            document.getElementById('saveDiaryBtn').textContent = '✏️ 更新';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ---- 打卡 ----
+        function setupCheckin() {
+            document.getElementById('addCheckBtn').onclick = async () => {
+                const title = document.getElementById('newCheckItem').value.trim();
+                if (!title) return alert('请输入打卡项目名称');
+                try {
+                    await supabase.from('checkins').insert([{ title, streak: 0 }]);
+                    document.getElementById('newCheckItem').value = '';
+                    loadCheckins();
+                } catch (err) {
+                    alert('添加失败：' + err.message);
+                }
+            };
+        }
+
+        async function loadCheckins() {
+            const container = document.getElementById('checkinList');
+            try {
+                const { data } = await supabase.from('checkins').select('*').order('created_at');
+                container.innerHTML = data?.length ? '' : '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有打卡项目～ 添加一个吧 ☑️</p>';
+                data?.forEach(c => {
+                    const today = new Date().toDateString();
+                    const lastDate = c.last_date ? new Date(c.last_date).toDateString() : '';
+                    const doneToday = lastDate === today;
+                    const div = document.createElement('div');
+                    div.className = 'check-item';
+                    div.innerHTML = `
+                        <span class="check-star" data-id="${c.id}">${doneToday ? '⭐' : '☆'}</span>
+                        <span style="flex:1;word-break:break-word;">${c.title}</span>
+                        <span style="font-size:0.8rem;color:var(--text-medium);white-space:nowrap;">🔥 ${c.streak || 0} 天</span>
+                        <button class="btn btn-sm" style="background:#f0d3d5;color:var(--text-medium);" data-id="${c.id}">🗑️</button>
+                    `;
+                    container.appendChild(div);
+                });
+                // 打卡
+                document.querySelectorAll('.check-star').forEach(s => {
+                    s.onclick = async (e) => {
+                        const id = e.target.dataset.id;
+                        const { data } = await supabase.from('checkins').select('*').eq('id', id).single();
+                        const today = new Date().toDateString();
+                        const last = data.last_date ? new Date(data.last_date).toDateString() : '';
+                        if (last === today) return;
+                        const yesterday = new Date(Date.now() - 86400000).toDateString();
+                        const newStreak = (last === yesterday) ? (data.streak || 0) + 1 : 1;
+                        await supabase.from('checkins').update({ last_date: new Date().toISOString(), streak: newStreak })
+                            .eq('id', id);
+                        loadCheckins();
+                    };
+                });
+                // 删除
+                document.querySelectorAll('.check-item .btn').forEach(b => {
+                    b.onclick = async (e) => {
+                        if (confirm('删除此打卡项目？')) {
+                            await supabase.from('checkins').delete().eq('id', e.target.dataset.id);
+                            loadCheckins();
+                        }
+                    };
+                });
+            } catch (err) {
+                container.innerHTML = `<p style="text-align:center;color:var(--rose-dark);">⚠️ 加载失败，请检查 Supabase 配置</p>`;
+            }
+        }
+
+        // ---- 心愿 ----
+        function setupWishes() {
+            document.getElementById('addWishBtn').onclick = async () => {
+                const text = document.getElementById('newWish').value.trim();
+                if (!text) return alert('请写下你的心愿');
+                try {
+                    await supabase.from('wishes').insert([{ text, done: false }]);
+                    document.getElementById('newWish').value = '';
+                    loadWishes();
+                } catch (err) {
+                    alert('添加失败：' + err.message);
+                }
+            };
+        }
+
+        async function loadWishes() {
+            const container = document.getElementById('wishList');
+            try {
+                const { data } = await supabase.from('wishes').select('*').order('created_at');
+                container.innerHTML = data?.length ? '' : '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有心愿～ 一起许个愿吧 🌟</p>';
+                data?.forEach(w => {
+                    const div = document.createElement('div');
+                    div.className = 'wish-item';
+                    div.innerHTML = `
+                        <span class="wish-star" data-id="${w.id}">${w.done ? '⭐' : '☆'}</span>
+                        <span style="flex:1;word-break:break-word;${w.done ? 'text-decoration:line-through;color:#aaa;' : ''}">${w.text}</span>
+                        <button class="btn btn-sm" style="background:#f0d3d5;color:var(--text-medium);" data-id="${w.id}">🗑️</button>
+                    `;
+                    container.appendChild(div);
+                });
+                // 标记完成
+                document.querySelectorAll('.wish-star').forEach(s => {
+                    s.onclick = async (e) => {
+                        const id = e.target.dataset.id;
+                        const { data } = await supabase.from('wishes').select('done').eq('id', id).single();
+                        await supabase.from('wishes').update({ done: !data.done }).eq('id', id);
+                        loadWishes();
+                    };
+                });
+                // 删除
+                document.querySelectorAll('.wish-item .btn').forEach(b => {
+                    b.onclick = async (e) => {
+                        await supabase.from('wishes').delete().eq('id', e.target.dataset.id);
+                        loadWishes();
+                    };
+                });
+            } catch (err) {
+                container.innerHTML = `<p style="text-align:center;color:var(--rose-dark);">⚠️ 加载失败，请检查 Supabase 配置</p>`;
+            }
+        }
+
+        // ---- 留言 ----
+        function setupMessages() {
+            document.getElementById('sendMsgBtn').onclick = async () => {
+                const text = document.getElementById('newMsg').value.trim();
+                if (!text) return alert('写点啥吧～');
+                const author = prompt('署名：小亮 或 瑶瑶？', '小亮');
+                if (!author) return;
+                try {
+                    await supabase.from('messages').insert([{ text, author }]);
+                    document.getElementById('newMsg').value = '';
+                    loadMessages();
+                } catch (err) {
+                    alert('发送失败：' + err.message);
+                }
+            };
+        }
+
+        async function loadMessages() {
+            const container = document.getElementById('msgList');
+            try {
+                const { data } = await supabase.from('messages').select('*').order('created_at', { ascending: false });
+                container.innerHTML = data?.length ? '' : '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有留言～ 写下第一句情话吧 💌</p>';
+                data?.forEach(m => {
+                    const div = document.createElement('div');
+                    div.className = 'msg-bubble';
+                    div.innerHTML = `
+                        <strong>${m.author || '匿名'}</strong>
+                        <small>${new Date(m.created_at).toLocaleString()}</small>
+                        <p>${m.text}</p>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (err) {
+                container.innerHTML = `<p style="text-align:center;color:var(--rose-dark);">⚠️ 加载失败，请检查 Supabase 配置</p>`;
+            }
+        }
+
+        // ---- 回忆盒 ----
+        function setupGallery() {
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.onclick = () => {
+                    document.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active'));
+                    b.classList.add('active');
+                    loadGallery(b.dataset.type);
+                };
+            });
+        }
+
+        async function loadGallery(filter = 'all') {
+            const grid = document.getElementById('galleryGrid');
+            try {
+                const { data } = await supabase.from('diaries').select('files');
+                let allFiles = [];
+                data?.forEach(d => {
+                    if (d.files) d.files.forEach(f => allFiles.push({ ...f, diary_date: d.created_at }));
+                });
+                if (filter !== 'all') {
+                    allFiles = allFiles.filter(f => {
+                        if (filter === 'image') return f.type?.startsWith('image/');
+                        if (filter === 'video') return f.type?.startsWith('video/');
+                        if (filter === 'audio') return f.type?.startsWith('audio/');
+                        if (filter === 'other') return !f.type?.startsWith('image/') && !f.type?.startsWith('video/') &&
+                            !f.type?.startsWith('audio/');
+                        return true;
+                    });
+                }
+                grid.innerHTML = allFiles.length ? '' :
+                    '<p style="text-align:center;color:var(--text-medium);padding:20px;width:100%;">还没有文件～ 在日记里上传吧 📸</p>';
+                allFiles.forEach(f => {
+                    const item = document.createElement('div');
+                    item.className = 'gallery-item';
+                    if (f.type?.startsWith('image/')) {
+                        item.innerHTML = `
+                            <img src="${f.data}" class="thumb" alt="${f.name}" />
+                            <div class="name">${f.name}</div>
+                        `;
+                    } else if (f.type?.startsWith('video/')) {
+                        item.innerHTML = `
+                            <video src="${f.data}" class="thumb" muted></video>
+                            <div class="name">🎬 ${f.name}</div>
+                        `;
+                    } else if (f.type?.startsWith('audio/')) {
+                        item.innerHTML = `
+                            <div style="height:80px;display:flex;align-items:center;justify-content:center;font-size:36px;background:#f5f0ed;border-radius:8px;">🎵</div>
+                            <div class="name">${f.name}</div>
+                            <audio controls src="${f.data}" style="width:100%;height:28px;margin-top:4px;"></audio>
+                        `;
+                    } else {
+                        item.innerHTML = `
+                            <a href="${f.data}" download="${f.name}" style="text-decoration:none;">
+                                <div style="height:80px;display:flex;align-items:center;justify-content:center;font-size:36px;background:#f5f0ed;border-radius:8px;">📄</div>
+                                <div class="name">${f.name}</div>
+                            </a>
+                        `;
+                    }
+                    grid.appendChild(item);
+                });
+            } catch (err) {
+                grid.innerHTML = `<p style="text-align:center;color:var(--rose-dark);width:100%;">⚠️ 加载失败，请检查 Supabase 配置</p>`;
+            }
+        }
+
+        // ---- 刷新所有 ----
+        function refreshAll() {
+            loadDiaries();
+            loadCheckins();
+            loadWishes();
+            loadMessages();
+            loadGallery('all');
+        }
+
+        // ============================================================
+        //  🌸 花 瓣 + 爱 心 粒 子 动 画
+        // ============================================================
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let w, h, particles = [];
+
+        class Particle {
+            constructor(type) {
+                this.type = type; // 'petal' or 'heart'
+                this.reset(true);
+            }
+            reset(init) {
+                this.x = Math.random() * w;
+                this.y = init ? Math.random() * -h : -60 - Math.random() * 120;
+                this.size = this.type === 'petal' ? (6 + Math.random() * 14) : (10 + Math.random() * 18);
+                this.speed = this.type === 'petal' ? (0.3 + Math.random() * 1.6) : (0.25 + Math.random() * 0.9);
+                this.rot = Math.random() * Math.PI * 2;
+                this.rotSpeed = (Math.random() - 0.5) * 0.04;
+                this.sway = Math.random() * 4;
+                this.swaySpeed = 0.003 + Math.random() * 0.012;
+                this.opacity = 0.5 + Math.random() * 0.5;
+                if (this.type === 'heart') {
+                    const colors = [
+                        [255, 105, 180],
+                        [255, 20, 147],
+                        [255, 182, 193],
+                        [255, 140, 160],
+                        [218, 112, 214],
+                        [255, 160, 122],
+                        [255, 100, 130]
+                    ];
+                    this.color = colors[Math.floor(Math.random() * colors.length)];
+                } else {
+                    const pinks = [
+                        [255, 200, 200],
+                        [255, 182, 185],
+                        [250, 190, 190],
+                        [255, 210, 210],
+                        [245, 175, 180]
+                    ];
+                    this.color = pinks[Math.floor(Math.random() * pinks.length)];
+                }
+            }
+            update() {
+                this.y += this.speed;
+                this.x += Math.sin(this.sway) * 0.5;
+                this.sway += this.swaySpeed;
+                this.rot += this.rotSpeed;
+                if (this.y > h + 80) this.reset(false);
+            }
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rot);
+                ctx.globalAlpha = this.opacity;
+                if (this.type === 'petal') {
+                    ctx.fillStyle = `rgb(${this.color[0]},${this.color[1]},${this.color[2]})`;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, this.size * 0.5, this.size * 0.2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // 花瓣纹路
+                    ctx.globalAlpha = this.opacity * 0.3;
+                    ctx.strokeStyle = `rgb(${this.color[0]-30},${this.color[1]-30},${this.color[2]-30})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.beginPath();
+                    ctx.moveTo(-this.size * 0.3, 0);
+                    ctx.lineTo(this.size * 0.3, 0);
+                    ctx.stroke();
+                } else {
+                    const s = this.size * 0.4;
+                    ctx.fillStyle = `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${this.opacity})`;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -s * 0.4);
+                    ctx.bezierCurveTo(-s, -s * 1.2, -s * 1.2, -s * 0.4, 0, s * 0.8);
+                    ctx.bezierCurveTo(s * 1.2, -s * 0.4, s, -s * 1.2, 0, -s * 0.4);
+                    ctx.fill();
+                    // 高光
+                    ctx.globalAlpha = this.opacity * 0.2;
+                    ctx.fillStyle = 'white';
+                    ctx.beginPath();
+                    ctx.arc(-s * 0.25, -s * 0.3, s * 0.15, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+
+        function resizeCanvas() {
+            w = window.innerWidth;
+            h = window.innerHeight;
+            canvas.width = w;
+            canvas.height = h;
+            const total = Math.min(Math.floor(w * h / 12000), 120);
+            const heartCount = Math.floor(total * 0.3);
+            const petalCount = total - heartCount;
+            while (particles.length < total) {
+                particles.push(new Particle(particles.length < heartCount ? 'heart' : 'petal'));
+            }
+            while (particles.length > total) particles.pop();
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, w, h);
+            particles.forEach(p => { p.update();
+                p.draw(ctx); });
+            requestAnimationFrame(animateParticles);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        animateParticles();
+
+        // ---- 控制台提示 ----
+        console.log('🌸 小亮 ❤️ 瑶瑶 · 秘密花园');
+        console.log('💡 密码提示：我们的纪念日 (四位数字)');
+        console.log('📌 如需修改密码，请编辑代码中的 SECRET_PASSWORD 变量');
+        console.log('🔗 部署说明：https://github.com/your-repo');
+    </script>
+</body>
+</html>
