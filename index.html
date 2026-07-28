@@ -1110,35 +1110,68 @@
         }
 
         // ---- 爱心 ----
-        function loadHearts() {
-            const hearts = parseInt(localStorage.getItem('love_hearts') || '0');
-            document.getElementById('heartCountDisplay').textContent = `收到了 ${hearts} 颗爱心`;
+        async function loadHearts() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('hearts')
+                    .select('count')
+                    .eq('id', 1)
+                    .single();
+                if (error) throw error;
+                const count = data?.count || 0;
+                document.getElementById('heartCountDisplay').textContent = `收到了 ${count} 颗爱心`;
+            } catch (err) {
+                console.error('加载爱心数失败：', err);
+                // 如果加载失败，显示 0 并给出提示
+                document.getElementById('heartCountDisplay').textContent = '❤️ 暂时无法获取爱心数';
+            }
         }
-
+        
         function setupHeartButton() {
-            document.getElementById('heartBtn').onclick = function(e) {
-                let hearts = parseInt(localStorage.getItem('love_hearts') || '0');
-                hearts++;
-                localStorage.setItem('love_hearts', hearts);
-                document.getElementById('heartCountDisplay').textContent = `收到了 ${hearts} 颗爱心`;
-                // 漂浮爱心特效
-                const emojis = ['❤️', '💕', '💗', '💖', '💘', '🌸', '🌺'];
-                for (let i = 0; i < 10; i++) {
-                    let el = document.createElement('span');
-                    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-                    el.style.position = 'fixed';
-                    el.style.left = (e.clientX + (Math.random() - 0.5) * 60) + 'px';
-                    el.style.top = (e.clientY + (Math.random() - 0.5) * 40) + 'px';
-                    el.style.fontSize = (18 + Math.random() * 28) + 'px';
-                    el.style.pointerEvents = 'none';
-                    el.style.zIndex = '9999';
-                    el.style.animation = 'floatUp 1.6s ease-out forwards';
-                    document.body.appendChild(el);
-                    setTimeout(() => el.remove(), 1700);
+            document.getElementById('heartBtn').onclick = async function(e) {
+                // 先获取当前爱心数
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('hearts')
+                        .select('count')
+                        .eq('id', 1)
+                        .single();
+                    if (error) throw error;
+                    const currentCount = data?.count || 0;
+                    const newCount = currentCount + 1;
+
+                    // 更新数据库
+                    const { error: updateError } = await supabaseClient
+                        .from('hearts')
+                        .update({ count: newCount })
+                        .eq('id', 1);
+                    if (updateError) throw updateError;
+
+                    // 更新界面
+                    document.getElementById('heartCountDisplay').textContent = `收到了 ${newCount} 颗爱心`;
+
+                    // 漂浮爱心特效（保留原来的动画）
+                    const emojis = ['❤️', '💕', '💗', '💖', '💘', '🌸', '🌺'];
+                    for (let i = 0; i < 10; i++) {
+                        let el = document.createElement('span');
+                        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                        el.style.position = 'fixed';
+                        el.style.left = (e.clientX + (Math.random() - 0.5) * 60) + 'px';
+                        el.style.top = (e.clientY + (Math.random() - 0.5) * 40) + 'px';
+                        el.style.fontSize = (18 + Math.random() * 28) + 'px';
+                        el.style.pointerEvents = 'none';
+                        el.style.zIndex = '9999';
+                        el.style.animation = 'floatUp 1.6s ease-out forwards';
+                        document.body.appendChild(el);
+                        setTimeout(() => el.remove(), 1700);
+                    }
+                } catch (err) {
+                    alert('❤️ 发送爱心失败，请稍后再试：' + err.message);
+                    console.error('爱心更新错误：', err);
                 }
             };
         }
-
+        
         // ---- 场景切换 ----
         function setupSceneSwitch() {
             document.getElementById('enterGarden').onclick = () => {
