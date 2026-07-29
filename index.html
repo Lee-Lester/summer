@@ -588,6 +588,13 @@
             margin-bottom: 10px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             border-left: 4px solid var(--rose-light);
+            transition: 0.2s;
+        }
+        .msg-bubble .msg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
         }
         .msg-bubble strong {
             color: var(--rose-dark);
@@ -597,9 +604,58 @@
             font-size: 0.75rem;
             margin-left: 8px;
         }
-        .msg-bubble p {
-            margin-top: 4px;
-            word-break: break-word;
+        .msg-bubble .msg-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .msg-bubble .msg-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-medium);
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 12px;
+            transition: 0.2s;
+        }
+        .msg-bubble .msg-actions button:hover {
+            background: rgba(232, 135, 138, 0.1);
+        }
+        .msg-bubble .msg-actions .like-btn.liked {
+            color: var(--rose);
+        }
+        .msg-bubble .reply-box {
+            margin-top: 8px;
+            display: none;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .msg-bubble .reply-box input {
+            flex: 1;
+            min-width: 120px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid #f0d3d5;
+            font-size: 0.85rem;
+        }
+        .msg-bubble .reply-box button {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: none;
+            background: var(--rose);
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .msg-bubble .replies {
+            margin-top: 8px;
+            padding-left: 16px;
+            border-left: 2px solid var(--rose-light);
+        }
+        .msg-bubble .replies .msg-bubble {
+            border-left-color: #e0c4c6;
+            background: rgba(255,255,255,0.5);
         }
 
         .filter-group {
@@ -642,6 +698,7 @@
             box-shadow: var(--shadow);
             transition: 0.3s;
             overflow: hidden;
+            cursor: pointer;
         }
         .gallery-item:hover {
             transform: translateY(-4px);
@@ -661,6 +718,100 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        /* 幻灯片模态框 */
+        .slideshow-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9998;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .slideshow-modal.active {
+            display: flex;
+        }
+        .slideshow-modal img {
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            object-fit: contain;
+        }
+        .slideshow-modal .controls {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        .slideshow-modal .controls button {
+            pointer-events: auto;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            padding: 10px 18px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        .slideshow-modal .controls button:hover {
+            background: rgba(255,255,255,0.4);
+        }
+        .slideshow-modal .close-slideshow {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            z-index: 9999;
+        }
+        .slideshow-modal .indicators {
+            position: absolute;
+            bottom: 30px;
+            display: flex;
+            gap: 8px;
+        }
+        .slideshow-modal .indicators span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transition: 0.3s;
+        }
+        .slideshow-modal .indicators span.active {
+            background: white;
+            transform: scale(1.2);
+        }
+
+        /* 月份选择 */
+        .month-selector {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .month-selector select {
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid #f0d3d5;
+            background: white;
+            font-size: 0.9rem;
         }
 
         /* ===== 音乐播放器样式 ===== */
@@ -819,6 +970,10 @@
             }
             .music-panel {
                 width: 220px;
+            }
+            .slideshow-modal img {
+                max-width: 95%;
+                max-height: 70vh;
             }
         }
         @media (max-width: 440px) {
@@ -1005,6 +1160,13 @@
                             <button class="btn primary" id="saveDiaryBtn">💾 保存日记</button>
                         </div>
                     </div>
+                    <!-- 月份筛选 -->
+                    <div class="month-selector">
+                        <span style="font-weight:600;">📅 按月份查看：</span>
+                        <select id="monthSelect">
+                            <option value="all">全部</option>
+                        </select>
+                    </div>
                     <div id="diaryList"></div>
                 </div>
 
@@ -1014,6 +1176,8 @@
                         <input type="text" id="newCheckItem" placeholder="新建打卡项目，例如：早安吻 💋" style="flex:1; min-width:160px;" />
                         <button class="btn primary" id="addCheckBtn">➕ 添加</button>
                     </div>
+                    <!-- 打卡日历容器 -->
+                    <div id="checkinCalendarContainer" style="margin-bottom:16px;"></div>
                     <div id="checkinList"></div>
                 </div>
 
@@ -1044,10 +1208,22 @@
                         <button class="filter-btn" data-type="audio">🎵 音频</button>
                         <button class="filter-btn" data-type="other">📄 文档</button>
                     </div>
+                    <button class="btn primary" id="slideshowBtn" style="margin-bottom:12px;">📽️ 幻灯片播放</button>
                     <div id="galleryGrid" class="gallery-grid"></div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- ===== 幻灯片模态框 ===== -->
+    <div id="slideshowModal" class="slideshow-modal">
+        <button class="close-slideshow" id="closeSlideshow">&times;</button>
+        <div class="controls">
+            <button id="prevSlide">&#10094;</button>
+            <button id="nextSlide">&#10095;</button>
+        </div>
+        <img id="slideImage" src="" alt="幻灯片" />
+        <div class="indicators" id="slideIndicators"></div>
     </div>
 
     <script>
@@ -1264,6 +1440,9 @@
         // ---- 应用初始化 ----
         let currentEditId = null;
         let pendingFiles = [];
+        let allDiaries = []; // 用于月份筛选
+        let currentSlideIndex = 0;
+        let slideImages = [];
 
         function initApp() {
             updateTimer();
@@ -1278,6 +1457,7 @@
             setupGallery();
             refreshAll();
             setupHeartButton();
+            setupSlideshow();
         }
 
         // ---- 计时器 ----
@@ -1383,7 +1563,7 @@
             });
         }
 
-        // ---- 工具：base64 转 Blob（仅用于编辑时还原） ----
+        // ---- 工具：base64 转 Blob ----
         function base64ToBlob(b64) {
             const parts = b64.split(',');
             const mime = parts[0].match(/:(.*?);/)[1];
@@ -1433,6 +1613,10 @@
             };
             document.getElementById('saveDiaryBtn').onclick = saveDiary;
             document.getElementById('cancelEditBtn').onclick = resetDiaryForm;
+            // 月份选择器事件
+            document.getElementById('monthSelect').addEventListener('change', () => {
+                renderDiaryList(allDiaries);
+            });
         }
 
         async function saveDiary() {
@@ -1442,7 +1626,6 @@
                 alert('写点什么吧～ 📝');
                 return;
             }
-            // 上传文件到 Storage
             const uploadedFiles = [];
             for (let file of pendingFiles) {
                 try {
@@ -1487,61 +1670,92 @@
             document.getElementById('saveDiaryBtn').textContent = '💾 保存日记';
         }
 
-        async function loadDiaries() {
+        function renderDiaryList(diaries) {
             const container = document.getElementById('diaryList');
+            const monthFilter = document.getElementById('monthSelect').value;
+            let filtered = diaries;
+            if (monthFilter !== 'all') {
+                filtered = diaries.filter(d => {
+                    const date = new Date(d.created_at);
+                    const key = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0');
+                    return key === monthFilter;
+                });
+            }
+            container.innerHTML = filtered.length ? '' : '<p style="text-align:center;color:var(--text-medium);padding:20px;">没有找到日记～</p>';
+            filtered.forEach(d => {
+                let filesHtml = '';
+                if (d.files && d.files.length > 0) {
+                    d.files.forEach(f => {
+                        if (f.type?.startsWith('image/')) {
+                            filesHtml += `<img src="${f.url}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin:2px;" />`;
+                        } else if (f.type?.startsWith('video/')) {
+                            filesHtml += `<video src="${f.url}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin:2px;" controls></video>`;
+                        } else if (f.type?.startsWith('audio/')) {
+                            filesHtml += `<audio src="${f.url}" controls style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin:2px;"></audio>`;
+                        } else {
+                            filesHtml += `<a href="${f.url}" download="${f.name}" style="display:inline-block;width:56px;height:56px;background:#f0d3d5;border-radius:8px;text-align:center;line-height:56px;text-decoration:none;color:var(--text-dark);">📄</a>`;
+                        }
+                    });
+                }
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+                        <span style="font-size:2rem;">${d.mood || '🥰'}</span>
+                        <small style="color:var(--text-medium);">${new Date(d.created_at).toLocaleString()}</small>
+                    </div>
+                    <p style="white-space:pre-wrap;margin:8px 0;word-break:break-word;">${d.content || ''}</p>
+                    ${filesHtml ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0;">${filesHtml}</div>` : ''}
+                    <div style="text-align:right;margin-top:10px;display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
+                        <button class="btn btn-sm btn-outline edit-btn" data-id="${d.id}">✏️ 编辑</button>
+                        <button class="btn btn-sm" style="background:#f0d3d5;color:var(--text-medium);" data-id="${d.id}">🗑️ 删除</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            // 绑定编辑/删除事件
+            container.querySelectorAll('.edit-btn').forEach(b => {
+                b.onclick = async (e) => {
+                    const id = e.target.dataset.id;
+                    const { data } = await supabaseClient.from('diaries').select('*').eq('id', id).single();
+                    if (data) editDiary(data);
+                };
+            });
+            container.querySelectorAll('.edit-btn + .btn').forEach(b => {
+                b.onclick = async (e) => {
+                    if (confirm('确定要删除这篇日记吗？')) {
+                        await supabaseClient.from('diaries').delete().eq('id', e.target.dataset.id);
+                        loadDiaries();
+                    }
+                };
+            });
+        }
+
+        async function loadDiaries() {
             try {
                 const { data } = await supabaseClient.from('diaries').select('*').order('created_at', { ascending: false });
-                container.innerHTML = data?.length ? '' : '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有日记～ 写下第一篇吧 📝</p>';
-                data?.forEach(d => {
-                    let filesHtml = '';
-                    if (d.files && d.files.length > 0) {
-                        d.files.forEach(f => {
-                            if (f.type?.startsWith('image/')) {
-                                filesHtml += `<img src="${f.url}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin:2px;" />`;
-                            } else if (f.type?.startsWith('video/')) {
-                                filesHtml += `<video src="${f.url}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin:2px;" controls></video>`;
-                            } else if (f.type?.startsWith('audio/')) {
-                                filesHtml += `<audio src="${f.url}" controls style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin:2px;"></audio>`;
-                            } else {
-                                filesHtml += `<a href="${f.url}" download="${f.name}" style="display:inline-block;width:56px;height:56px;background:#f0d3d5;border-radius:8px;text-align:center;line-height:56px;text-decoration:none;color:var(--text-dark);">📄</a>`;
-                            }
-                        });
-                    }
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-                            <span style="font-size:2rem;">${d.mood || '🥰'}</span>
-                            <small style="color:var(--text-medium);">${new Date(d.created_at).toLocaleString()}</small>
-                        </div>
-                        <p style="white-space:pre-wrap;margin:8px 0;word-break:break-word;">${d.content || ''}</p>
-                        ${filesHtml ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0;">${filesHtml}</div>` : ''}
-                        <div style="text-align:right;margin-top:10px;display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
-                            <button class="btn btn-sm btn-outline edit-btn" data-id="${d.id}">✏️ 编辑</button>
-                            <button class="btn btn-sm" style="background:#f0d3d5;color:var(--text-medium);" data-id="${d.id}">🗑️ 删除</button>
-                        </div>
-                    `;
-                    container.appendChild(card);
+                allDiaries = data || [];
+                // 更新月份下拉
+                const select = document.getElementById('monthSelect');
+                const currentVal = select.value;
+                select.innerHTML = '<option value="all">全部</option>';
+                const months = new Set();
+                allDiaries.forEach(d => {
+                    const date = new Date(d.created_at);
+                    const key = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0');
+                    months.add(key);
                 });
-                // 编辑
-                document.querySelectorAll('.edit-btn').forEach(b => {
-                    b.onclick = async (e) => {
-                        const id = e.target.dataset.id;
-                        const { data } = await supabaseClient.from('diaries').select('*').eq('id', id).single();
-                        if (data) editDiary(data);
-                    };
+                [...months].sort().forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m;
+                    const parts = m.split('-');
+                    opt.textContent = parts[0] + '年' + parseInt(parts[1]) + '月';
+                    select.appendChild(opt);
                 });
-                // 删除
-                document.querySelectorAll('.edit-btn + .btn').forEach(b => {
-                    b.onclick = async (e) => {
-                        if (confirm('确定要删除这篇日记吗？')) {
-                            await supabaseClient.from('diaries').delete().eq('id', e.target.dataset.id);
-                            loadDiaries();
-                        }
-                    };
-                });
+                select.value = currentVal;
+                renderDiaryList(allDiaries);
             } catch (err) {
-                container.innerHTML = `<p style="text-align:center;color:var(--rose-dark);">⚠️ 加载失败，请检查 Supabase 配置</p>`;
+                document.getElementById('diaryList').innerHTML = `<p style="text-align:center;color:var(--rose-dark);">⚠️ 加载失败</p>`;
             }
         }
 
@@ -1550,18 +1764,15 @@
             document.querySelectorAll('.mood').forEach(m => m.classList.remove('selected'));
             const moodEl = document.querySelector(`.mood[data-mood="${diary.mood}"]`);
             if (moodEl) moodEl.classList.add('selected');
-            // 编辑时只清空预览区，不恢复旧文件（因为旧文件已在storage，不需要重新上传）
             pendingFiles = [];
             document.getElementById('filePreview').innerHTML = '';
-            // 如果有旧文件，可以显示为只读缩略图，但不允许删除（因为删除storage文件需要额外权限，为简化不实现）
             if (diary.files && diary.files.length > 0) {
                 const div = document.createElement('div');
                 div.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;padding:8px;background:#f9f0ed;border-radius:8px;';
                 div.innerHTML = '<span style="font-weight:600;font-size:0.8rem;width:100%;">已有文件：</span>';
                 diary.files.forEach(f => {
                     const span = document.createElement('span');
-                    span.style.cssText =
-                        'display:inline-block;padding:2px 8px;background:white;border-radius:12px;font-size:0.7rem;color:var(--text-medium);';
+                    span.style.cssText = 'display:inline-block;padding:2px 8px;background:white;border-radius:12px;font-size:0.7rem;color:var(--text-medium);';
                     span.textContent = f.name;
                     div.appendChild(span);
                 });
@@ -1579,7 +1790,7 @@
                 const title = document.getElementById('newCheckItem').value.trim();
                 if (!title) return alert('请输入打卡项目名称');
                 try {
-                    await supabaseClient.from('checkins').insert([{ title, streak: 0 }]);
+                    await supabaseClient.from('checkins').insert([{ title, streak: 0, dates: [] }]);
                     document.getElementById('newCheckItem').value = '';
                     loadCheckins();
                 } catch (err) {
@@ -1588,11 +1799,46 @@
             };
         }
 
+        function renderCalendar(dates) {
+            const container = document.getElementById('checkinCalendarContainer');
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month+1, 0).getDate();
+
+            let html = '<div style="display:grid; grid-template-columns: repeat(7,1fr); gap:4px; background:white; padding:12px; border-radius:12px; box-shadow: var(--shadow);">';
+            ['日','一','二','三','四','五','六'].forEach(day => {
+                html += `<div style="text-align:center;font-size:0.75rem;color:var(--text-medium);">${day}</div>`;
+            });
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div></div>`;
+            }
+            const dateSet = new Set(dates || []);
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const isToday = dateStr === new Date().toISOString().split('T')[0];
+                const hasCheck = dateSet.has(dateStr);
+                html += `<div style="text-align:center;padding:4px 0;border-radius:4px;font-size:0.85rem;
+                    ${hasCheck ? 'background:rgba(232,135,138,0.15);' : ''}
+                    ${isToday ? 'border:2px solid var(--rose);' : ''}
+                ">${hasCheck ? '✅' : d}</div>`;
+            }
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
         async function loadCheckins() {
             const container = document.getElementById('checkinList');
             try {
                 const { data } = await supabaseClient.from('checkins').select('*').order('created_at');
                 container.innerHTML = data?.length ? '' : '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有打卡项目～ 添加一个吧 ☑️</p>';
+                // 渲染第一个项目的日历（如果有多个，可以各自显示，此处简化取第一个）
+                if (data && data.length > 0) {
+                    renderCalendar(data[0].dates || []);
+                } else {
+                    document.getElementById('checkinCalendarContainer').innerHTML = '';
+                }
                 data?.forEach(c => {
                     const today = new Date().toDateString();
                     const lastDate = c.last_date ? new Date(c.last_date).toDateString() : '';
@@ -1616,8 +1862,16 @@
                         if (last === today) return;
                         const yesterday = new Date(Date.now() - 86400000).toDateString();
                         const newStreak = (last === yesterday) ? (data.streak || 0) + 1 : 1;
-                        await supabaseClient.from('checkins').update({ last_date: new Date().toISOString(), streak: newStreak })
-                            .eq('id', id);
+                        const todayStr = new Date().toISOString().split('T')[0];
+                        const newDates = data.dates || [];
+                        if (!newDates.includes(todayStr)) {
+                            newDates.push(todayStr);
+                        }
+                        await supabaseClient.from('checkins').update({
+                            last_date: new Date().toISOString(),
+                            streak: newStreak,
+                            dates: newDates
+                        }).eq('id', id);
                         loadCheckins();
                     };
                 });
@@ -1683,7 +1937,7 @@
             }
         }
 
-        // ---- 留言 ----
+        // ---- 留言（支持回复和点赞） ----
         function setupMessages() {
             document.getElementById('sendMsgBtn').onclick = async () => {
                 const text = document.getElementById('newMsg').value.trim();
@@ -1691,7 +1945,7 @@
                 const author = prompt('署名：小亮 或 瑶瑶？', '小亮');
                 if (!author) return;
                 try {
-                    await supabaseClient.from('messages').insert([{ text, author }]);
+                    await supabaseClient.from('messages').insert([{ text, author, parent_id: null, likes: 0, liked_by: [] }]);
                     document.getElementById('newMsg').value = '';
                     loadMessages();
                 } catch (err) {
@@ -1700,21 +1954,128 @@
             };
         }
 
+        function buildMessageTree(messages) {
+            const map = {};
+            const roots = [];
+            messages.forEach(m => { map[m.id] = { ...m, children: [] }; });
+            messages.forEach(m => {
+                if (m.parent_id && map[m.parent_id]) {
+                    map[m.parent_id].children.push(map[m.id]);
+                } else {
+                    roots.push(map[m.id]);
+                }
+            });
+            return roots;
+        }
+
+        function renderMessageTree(messages, container, depth = 0) {
+            messages.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'msg-bubble';
+                if (depth > 0) {
+                    div.style.marginLeft = (depth * 16) + 'px';
+                    div.style.borderLeftColor = '#e0c4c6';
+                }
+                const liked = (m.liked_by || []).includes('user_' + (localStorage.getItem('visitor_id') || 'guest'));
+                div.innerHTML = `
+                    <div class="msg-header">
+                        <div><strong>${m.author || '匿名'}</strong> <small>${new Date(m.created_at).toLocaleString()}</small></div>
+                        <div>
+                            <span style="color:var(--text-medium);font-size:0.8rem;">❤️ ${m.likes || 0}</span>
+                        </div>
+                    </div>
+                    <p>${m.text}</p>
+                    <div class="msg-actions">
+                        <button class="like-btn ${liked ? 'liked' : ''}" data-id="${m.id}">${liked ? '❤️' : '🤍'} 赞</button>
+                        <button class="reply-btn" data-id="${m.id}">💬 回复</button>
+                    </div>
+                    <div class="reply-box" id="reply-box-${m.id}">
+                        <input type="text" placeholder="写下回复…" />
+                        <button class="submit-reply" data-id="${m.id}">发送</button>
+                    </div>
+                    <div class="replies"></div>
+                `;
+                container.appendChild(div);
+
+                // 点赞事件
+                div.querySelector('.like-btn').onclick = async (e) => {
+                    e.stopPropagation();
+                    const id = m.id;
+                    const likeBtn = e.currentTarget;
+                    const isLiked = likeBtn.classList.contains('liked');
+                    const likedBy = m.liked_by || [];
+                    const visitorId = 'user_' + (localStorage.getItem('visitor_id') || 'guest');
+                    let newLikedBy;
+                    if (isLiked) {
+                        newLikedBy = likedBy.filter(v => v !== visitorId);
+                    } else {
+                        newLikedBy = [...likedBy, visitorId];
+                    }
+                    const newLikes = newLikedBy.length;
+                    try {
+                        await supabaseClient.from('messages').update({ likes: newLikes, liked_by: newLikedBy }).eq('id', id);
+                        loadMessages();
+                    } catch (err) {
+                        alert('点赞失败：' + err.message);
+                    }
+                };
+
+                // 回复按钮：显示/隐藏输入框
+                div.querySelector('.reply-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    const box = div.querySelector('.reply-box');
+                    box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+                    if (box.style.display === 'flex') {
+                        box.querySelector('input').focus();
+                    }
+                };
+
+                // 提交回复
+                div.querySelector('.submit-reply').onclick = async (e) => {
+                    e.stopPropagation();
+                    const input = div.querySelector('.reply-box input');
+                    const text = input.value.trim();
+                    if (!text) return alert('写点回复吧～');
+                    const author = prompt('署名：', '小亮');
+                    if (!author) return;
+                    try {
+                        await supabaseClient.from('messages').insert({
+                            text,
+                            author,
+                            parent_id: m.id,
+                            likes: 0,
+                            liked_by: []
+                        });
+                        input.value = '';
+                        div.querySelector('.reply-box').style.display = 'none';
+                        loadMessages();
+                    } catch (err) {
+                        alert('回复失败：' + err.message);
+                    }
+                };
+
+                // 递归渲染子回复
+                if (m.children && m.children.length > 0) {
+                    const repliesContainer = div.querySelector('.replies');
+                    renderMessageTree(m.children, repliesContainer, depth + 1);
+                }
+            });
+        }
+
         async function loadMessages() {
             const container = document.getElementById('msgList');
             try {
                 const { data } = await supabaseClient.from('messages').select('*').order('created_at', { ascending: false });
-                container.innerHTML = data?.length ? '' : '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有留言～ 写下第一句情话吧 💌</p>';
-                data?.forEach(m => {
-                    const div = document.createElement('div');
-                    div.className = 'msg-bubble';
-                    div.innerHTML = `
-                        <strong>${m.author || '匿名'}</strong>
-                        <small>${new Date(m.created_at).toLocaleString()}</small>
-                        <p>${m.text}</p>
-                    `;
-                    container.appendChild(div);
-                });
+                // 构建树
+                const tree = buildMessageTree(data || []);
+                container.innerHTML = '';
+                if (tree.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有留言～ 写下第一句情话吧 💌</p>';
+                    return;
+                }
+                // 按时间倒序排列根节点（最新在上）
+                tree.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+                renderMessageTree(tree, container);
             } catch (err) {
                 container.innerHTML = `<p style="text-align:center;color:var(--rose-dark);">⚠️ 加载失败，请检查 Supabase 配置</p>`;
             }
@@ -1729,7 +2090,11 @@
                     loadGallery(b.dataset.type);
                 };
             });
+            // 幻灯片按钮
+            document.getElementById('slideshowBtn').onclick = startSlideshow;
         }
+
+        let allGalleryFiles = [];
 
         async function loadGallery(filter = 'all') {
             const grid = document.getElementById('galleryGrid');
@@ -1739,6 +2104,7 @@
                 data?.forEach(d => {
                     if (d.files) d.files.forEach(f => allFiles.push({ ...f, diary_date: d.created_at }));
                 });
+                allGalleryFiles = allFiles;
                 if (filter !== 'all') {
                     allFiles = allFiles.filter(f => {
                         if (filter === 'image') return f.type?.startsWith('image/');
@@ -1780,8 +2146,92 @@
                     }
                     grid.appendChild(item);
                 });
+                // 点击图片可触发幻灯片
+                grid.querySelectorAll('.gallery-item img').forEach((img, idx) => {
+                    img.parentElement.onclick = () => {
+                        const imageFiles = allFiles.filter(f => f.type?.startsWith('image/'));
+                        const index = imageFiles.findIndex(f => f.url === img.src);
+                        if (index !== -1) {
+                            startSlideshow(index);
+                        }
+                    };
+                });
             } catch (err) {
                 grid.innerHTML = `<p style="text-align:center;color:var(--rose-dark);width:100%;">⚠️ 加载失败，请检查 Supabase 配置</p>`;
+            }
+        }
+
+        // ---- 幻灯片 ----
+        function setupSlideshow() {
+            const modal = document.getElementById('slideshowModal');
+            document.getElementById('closeSlideshow').onclick = closeSlideshow;
+            document.getElementById('prevSlide').onclick = () => changeSlide(-1);
+            document.getElementById('nextSlide').onclick = () => changeSlide(1);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeSlideshow();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (!modal.classList.contains('active')) return;
+                if (e.key === 'Escape') closeSlideshow();
+                if (e.key === 'ArrowLeft') changeSlide(-1);
+                if (e.key === 'ArrowRight') changeSlide(1);
+            });
+            // 自动播放定时器
+            let autoPlayTimer = null;
+            modal.addEventListener('mouseenter', () => {
+                if (autoPlayTimer) clearInterval(autoPlayTimer);
+            });
+            modal.addEventListener('mouseleave', () => {
+                if (modal.classList.contains('active')) {
+                    autoPlayTimer = setInterval(() => changeSlide(1), 3000);
+                }
+            });
+        }
+
+        function startSlideshow(startIndex = 0) {
+            const imageFiles = allGalleryFiles.filter(f => f.type?.startsWith('image/'));
+            if (imageFiles.length === 0) {
+                alert('还没有图片可以播放～');
+                return;
+            }
+            slideImages = imageFiles;
+            currentSlideIndex = startIndex % slideImages.length;
+            const modal = document.getElementById('slideshowModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            showSlide(currentSlideIndex);
+            // 指示器
+            const ind = document.getElementById('slideIndicators');
+            ind.innerHTML = slideImages.map((_, i) =>
+                `<span class="${i === currentSlideIndex ? 'active' : ''}"></span>`
+            ).join('');
+            // 自动播放
+            if (window._slideshowTimer) clearInterval(window._slideshowTimer);
+            window._slideshowTimer = setInterval(() => changeSlide(1), 3000);
+        }
+
+        function showSlide(index) {
+            const img = document.getElementById('slideImage');
+            img.src = slideImages[index].url;
+            img.alt = slideImages[index].name;
+            // 更新指示器
+            document.querySelectorAll('#slideIndicators span').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
+        }
+
+        function changeSlide(delta) {
+            currentSlideIndex = (currentSlideIndex + delta + slideImages.length) % slideImages.length;
+            showSlide(currentSlideIndex);
+        }
+
+        function closeSlideshow() {
+            const modal = document.getElementById('slideshowModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            if (window._slideshowTimer) {
+                clearInterval(window._slideshowTimer);
+                window._slideshowTimer = null;
             }
         }
 
@@ -1905,7 +2355,6 @@
         animateParticles();
 
         console.log('🌸 小亮 ❤️ 瑶瑶 · 秘密花园 完整版已加载！');
-        console.log('💡 提示：请将歌单中的歌曲链接替换为你自己的 MP3 文件地址。');
         console.log('📦 存储桶名称：', STORAGE_BUCKET);
     </script>
 </body>
