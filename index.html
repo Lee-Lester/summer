@@ -901,6 +901,120 @@
             font-size: 0.9rem;
         }
 
+        /* 日记评论 */
+        .diary-comments {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(200, 160, 165, 0.2);
+        }
+        .diary-comments .toggle-comments {
+            cursor: pointer;
+            color: var(--text-medium);
+            font-size: 0.85rem;
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 12px;
+            transition: 0.2s;
+        }
+        .diary-comments .toggle-comments:hover {
+            background: rgba(200, 160, 165, 0.1);
+        }
+        .diary-comments .comment-area {
+            display: none;
+            margin-top: 8px;
+        }
+        .diary-comments .comment-area .comment-input-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .diary-comments .comment-area .comment-input-row input {
+            flex: 1;
+            min-width: 120px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid #f0d3d5;
+            font-size: 0.85rem;
+        }
+        .diary-comments .comment-area .comment-input-row button {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: none;
+            background: var(--rose);
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .diary-comments .comment-item {
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 12px;
+            border-left: 3px solid var(--rose-light);
+        }
+        .diary-comments .comment-item .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+        }
+        .diary-comments .comment-item .comment-header strong {
+            color: var(--rose-dark);
+        }
+        .diary-comments .comment-item .comment-header small {
+            color: var(--text-medium);
+        }
+        .diary-comments .comment-item .comment-text {
+            margin: 4px 0;
+        }
+        .diary-comments .comment-item .comment-actions {
+            display: flex;
+            gap: 12px;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+        .diary-comments .comment-item .comment-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-medium);
+            padding: 0;
+        }
+        .diary-comments .comment-item .comment-actions .like-btn.liked {
+            color: var(--rose);
+        }
+        .diary-comments .comment-item .reply-box {
+            display: none;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+        .diary-comments .comment-item .reply-box input {
+            flex: 1;
+            min-width: 100px;
+            padding: 4px 10px;
+            border-radius: 16px;
+            border: 1px solid #f0d3d5;
+            font-size: 0.8rem;
+        }
+        .diary-comments .comment-item .reply-box button {
+            padding: 4px 12px;
+            border-radius: 16px;
+            border: none;
+            background: var(--rose);
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .diary-comments .comment-item .replies {
+            margin-top: 6px;
+            padding-left: 16px;
+            border-left: 2px solid #e0c4c6;
+        }
+
         /* ===== 音乐播放器样式 ===== */
         .music-player {
             position: fixed;
@@ -1558,12 +1672,12 @@
         // ---- 应用初始化 ----
         let currentEditId = null;
         let pendingFiles = [];
-        let allDiaries = []; // 用于月份筛选
+        let allDiaries = [];
         let currentSlideIndex = 0;
         let slideImages = [];
 
         // ---- 任务相关全局变量 ----
-        let currentTaskDate = new Date(); // 当前查看的日期
+        let currentTaskDate = new Date();
         const taskStatusMap = { 0: '☐', 1: '◐', 2: '✅' };
         const taskStatusNext = { 0: 1, 1: 2, 2: 0 };
 
@@ -1576,7 +1690,7 @@
             setupDiary();
             setupCheckin();
             setupWishes();
-            setupTasks(); // 新增
+            setupTasks();
             setupMessages();
             setupGallery();
             refreshAll();
@@ -1738,7 +1852,6 @@
             };
             document.getElementById('saveDiaryBtn').onclick = saveDiary;
             document.getElementById('cancelEditBtn').onclick = resetDiaryForm;
-            // 月份选择器事件
             document.getElementById('monthSelect').addEventListener('change', () => {
                 renderDiaryList(allDiaries);
             });
@@ -1795,6 +1908,7 @@
             document.getElementById('saveDiaryBtn').textContent = '💾 保存日记';
         }
 
+        // ---- 渲染日记列表（包含评论功能） ----
         function renderDiaryList(diaries) {
             const container = document.getElementById('diaryList');
             const monthFilter = document.getElementById('monthSelect').value;
@@ -1824,6 +1938,7 @@
                 }
                 const card = document.createElement('div');
                 card.className = 'card';
+                card.dataset.diaryId = d.id;
                 card.innerHTML = `
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
                         <span style="font-size:2rem;">${d.mood || '🥰'}</span>
@@ -1835,24 +1950,202 @@
                         <button class="btn btn-sm btn-outline edit-btn" data-id="${d.id}">✏️ 编辑</button>
                         <button class="btn btn-sm" style="background:#f0d3d5;color:var(--text-medium);" data-id="${d.id}">🗑️ 删除</button>
                     </div>
+                    <!-- 评论区域 -->
+                    <div class="diary-comments">
+                        <button class="toggle-comments" data-diary="${d.id}">💬 评论 (<span class="comment-count-${d.id}">0</span>)</button>
+                        <div class="comment-area" id="comment-area-${d.id}" style="display:none;">
+                            <div class="comment-input-row">
+                                <input type="text" class="comment-input" data-diary="${d.id}" placeholder="写评论…" />
+                                <button class="comment-submit" data-diary="${d.id}">发送</button>
+                            </div>
+                            <div class="comment-list" id="comment-list-${d.id}"></div>
+                        </div>
+                    </div>
                 `;
                 container.appendChild(card);
-            });
-            // 绑定编辑/删除事件
-            container.querySelectorAll('.edit-btn').forEach(b => {
-                b.onclick = async (e) => {
+
+                // ---- 绑定日记编辑/删除 ----
+                card.querySelector('.edit-btn').onclick = async (e) => {
                     const id = e.target.dataset.id;
                     const { data } = await supabaseClient.from('diaries').select('*').eq('id', id).single();
                     if (data) editDiary(data);
                 };
-            });
-            container.querySelectorAll('.edit-btn + .btn').forEach(b => {
-                b.onclick = async (e) => {
+                card.querySelector('.edit-btn + .btn').onclick = async (e) => {
                     if (confirm('确定要删除这篇日记吗？')) {
                         await supabaseClient.from('diaries').delete().eq('id', e.target.dataset.id);
                         loadDiaries();
                     }
                 };
+
+                // ---- 评论交互 ----
+                const toggleBtn = card.querySelector('.toggle-comments');
+                const commentArea = card.querySelector('.comment-area');
+                const commentList = card.querySelector('.comment-list');
+                const commentInput = card.querySelector('.comment-input');
+                const submitBtn = card.querySelector('.comment-submit');
+
+                // 加载评论
+                const loadComments = async () => {
+                    const { data: comments } = await supabaseClient
+                        .from('diary_comments')
+                        .select('*')
+                        .eq('diary_id', d.id)
+                        .order('created_at', { ascending: true });
+                    const tree = buildCommentTree(comments || []);
+                    renderCommentTree(tree, commentList);
+                    // 更新评论数
+                    const count = comments ? comments.filter(c => !c.parent_id).length : 0;
+                    card.querySelector(`.comment-count-${d.id}`).textContent = count;
+                };
+
+                toggleBtn.onclick = () => {
+                    const isHidden = commentArea.style.display === 'none';
+                    commentArea.style.display = isHidden ? 'block' : 'none';
+                    if (isHidden) loadComments();
+                };
+
+                submitBtn.onclick = async () => {
+                    const text = commentInput.value.trim();
+                    if (!text) return alert('写点评论吧～');
+                    const author = prompt('署名：小亮 或 瑶瑶？', '小亮');
+                    if (!author) return;
+                    try {
+                        await supabaseClient.from('diary_comments').insert({
+                            diary_id: d.id,
+                            parent_id: null,
+                            author,
+                            text,
+                            likes: 0,
+                            liked_by: []
+                        });
+                        commentInput.value = '';
+                        loadComments();
+                    } catch (err) {
+                        alert('评论失败：' + err.message);
+                    }
+                };
+
+                // 回车发送
+                commentInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') submitBtn.click();
+                });
+
+                // 初始加载评论（如果展开状态默认可不加载，但我们在点击时加载）
+                // 存储评论加载函数以便后续使用
+                card._loadComments = loadComments;
+            });
+        }
+
+        // ---- 评论树构建和渲染（类似留言板） ----
+        function buildCommentTree(comments) {
+            const map = {};
+            const roots = [];
+            comments.forEach(c => { map[c.id] = { ...c, children: [] }; });
+            comments.forEach(c => {
+                if (c.parent_id && map[c.parent_id]) {
+                    map[c.parent_id].children.push(map[c.id]);
+                } else {
+                    roots.push(map[c.id]);
+                }
+            });
+            return roots;
+        }
+
+        function renderCommentTree(comments, container, depth = 0) {
+            container.innerHTML = '';
+            comments.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'comment-item';
+                if (depth > 0) {
+                    div.style.marginLeft = (depth * 16) + 'px';
+                }
+                const liked = (c.liked_by || []).includes('user_' + (localStorage.getItem('visitor_id') || 'guest'));
+                div.innerHTML = `
+                    <div class="comment-header">
+                        <div><strong>${c.author}</strong> <small>${new Date(c.created_at).toLocaleString()}</small></div>
+                        <div><span style="font-size:0.8rem;color:var(--text-medium);">❤️ ${c.likes || 0}</span></div>
+                    </div>
+                    <div class="comment-text">${c.text}</div>
+                    <div class="comment-actions">
+                        <button class="like-btn ${liked ? 'liked' : ''}" data-id="${c.id}">${liked ? '❤️' : '🤍'} 赞</button>
+                        <button class="reply-btn" data-id="${c.id}">💬 回复</button>
+                    </div>
+                    <div class="reply-box" data-parent="${c.id}">
+                        <input type="text" placeholder="写回复…" />
+                        <button class="submit-reply" data-parent="${c.id}">发送</button>
+                    </div>
+                    <div class="replies"></div>
+                `;
+                container.appendChild(div);
+
+                // 点赞
+                div.querySelector('.like-btn').onclick = async (e) => {
+                    e.stopPropagation();
+                    const id = c.id;
+                    const likeBtn = e.currentTarget;
+                    const isLiked = likeBtn.classList.contains('liked');
+                    const likedBy = c.liked_by || [];
+                    const visitorId = 'user_' + (localStorage.getItem('visitor_id') || 'guest');
+                    let newLikedBy;
+                    if (isLiked) {
+                        newLikedBy = likedBy.filter(v => v !== visitorId);
+                    } else {
+                        newLikedBy = [...likedBy, visitorId];
+                    }
+                    const newLikes = newLikedBy.length;
+                    try {
+                        await supabaseClient.from('diary_comments').update({ likes: newLikes, liked_by: newLikedBy }).eq('id', id);
+                        // 重新加载评论（刷新整个列表）
+                        const diaryId = container.closest('.card').dataset.diaryId;
+                        if (diaryId && container.closest('.card')._loadComments) {
+                            container.closest('.card')._loadComments();
+                        }
+                    } catch (err) {
+                        alert('点赞失败：' + err.message);
+                    }
+                };
+
+                // 回复显示/隐藏
+                div.querySelector('.reply-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    const box = div.querySelector('.reply-box');
+                    box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+                    if (box.style.display === 'flex') box.querySelector('input').focus();
+                };
+
+                // 提交回复
+                div.querySelector('.submit-reply').onclick = async (e) => {
+                    e.stopPropagation();
+                    const input = div.querySelector('.reply-box input');
+                    const text = input.value.trim();
+                    if (!text) return alert('写点回复吧～');
+                    const author = prompt('署名：', '小亮');
+                    if (!author) return;
+                    try {
+                        const diaryId = container.closest('.card').dataset.diaryId;
+                        await supabaseClient.from('diary_comments').insert({
+                            diary_id: diaryId,
+                            parent_id: c.id,
+                            author,
+                            text,
+                            likes: 0,
+                            liked_by: []
+                        });
+                        input.value = '';
+                        div.querySelector('.reply-box').style.display = 'none';
+                        if (container.closest('.card')._loadComments) {
+                            container.closest('.card')._loadComments();
+                        }
+                    } catch (err) {
+                        alert('回复失败：' + err.message);
+                    }
+                };
+
+                // 递归子回复
+                if (c.children && c.children.length > 0) {
+                    const repliesContainer = div.querySelector('.replies');
+                    renderCommentTree(c.children, repliesContainer, depth + 1);
+                }
             });
         }
 
@@ -2141,7 +2434,6 @@
                     container.innerHTML = '<p style="text-align:center;color:var(--text-medium);padding:20px;">今天还没有任务，安排起来吧！💪</p>';
                     return;
                 }
-                // 按 period 分组
                 const groups = { '上午': [], '下午': [], '晚上': [], '其他': [] };
                 data.forEach(task => {
                     if (groups[task.period]) groups[task.period].push(task);
@@ -2155,7 +2447,7 @@
                         const statusSymbol = taskStatusMap[task.status] || '☐';
                         html += `
                             <div class="task-item" data-id="${task.id}">
-                                <span class="task-status" data-id="${task.id}">${statusSymbol}</span>
+                                <span class="task-status" data-id="${task.id}" data-status="${task.status}">${statusSymbol}</span>
                                 <span class="task-text">${task.text}</span>
                                 <button class="btn btn-sm" style="background:#f0d3d5;color:var(--text-medium);" data-id="${task.id}">🗑️</button>
                             </div>
@@ -2165,7 +2457,6 @@
                 }
                 container.innerHTML = html;
 
-                // 绑定事件：切换状态
                 container.querySelectorAll('.task-status').forEach(el => {
                     el.onclick = async (e) => {
                         e.stopPropagation();
@@ -2174,14 +2465,12 @@
                         const newStatus = taskStatusNext[currentStatus] || 0;
                         try {
                             await supabaseClient.from('tasks').update({ status: newStatus }).eq('id', id);
-                            loadTasks(); // 刷新列表
+                            loadTasks();
                         } catch (err) {
                             alert('更新任务状态失败：' + err.message);
                         }
                     };
                 });
-
-                // 绑定删除事件
                 container.querySelectorAll('.task-item .btn').forEach(btn => {
                     btn.onclick = async (e) => {
                         e.stopPropagation();
@@ -2196,7 +2485,6 @@
                         }
                     };
                 });
-
             } catch (err) {
                 container.innerHTML = `<p style="text-align:center;color:var(--rose-dark);">⚠️ 加载失败</p>`;
             }
@@ -2262,7 +2550,6 @@
                 `;
                 container.appendChild(div);
 
-                // 点赞事件
                 div.querySelector('.like-btn').onclick = async (e) => {
                     e.stopPropagation();
                     const id = m.id;
@@ -2285,7 +2572,6 @@
                     }
                 };
 
-                // 回复按钮：显示/隐藏输入框
                 div.querySelector('.reply-btn').onclick = (e) => {
                     e.stopPropagation();
                     const box = div.querySelector('.reply-box');
@@ -2295,7 +2581,6 @@
                     }
                 };
 
-                // 提交回复
                 div.querySelector('.submit-reply').onclick = async (e) => {
                     e.stopPropagation();
                     const input = div.querySelector('.reply-box input');
@@ -2319,7 +2604,6 @@
                     }
                 };
 
-                // 递归渲染子回复
                 if (m.children && m.children.length > 0) {
                     const repliesContainer = div.querySelector('.replies');
                     renderMessageTree(m.children, repliesContainer, depth + 1);
