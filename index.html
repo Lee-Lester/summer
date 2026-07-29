@@ -483,7 +483,8 @@
             text-shadow: 0 2px 12px rgba(200, 110, 115, 0.3);
         }
         textarea,
-        input[type="text"] {
+        input[type="text"],
+        input[type="date"] {
             width: 100%;
             padding: 12px 16px;
             border-radius: 16px;
@@ -498,6 +499,15 @@
         input:focus {
             border-color: var(--rose);
             box-shadow: 0 0 0 4px rgba(232, 135, 138, 0.1);
+        }
+        select {
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1.5px solid rgba(200, 160, 165, 0.25);
+            background: rgba(255, 255, 255, 0.8);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
         }
         .file-upload {
             border: 2px dashed rgba(200, 160, 165, 0.35);
@@ -556,7 +566,8 @@
         }
 
         .check-item,
-        .wish-item {
+        .wish-item,
+        .task-item {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -564,7 +575,8 @@
             border-bottom: 1px solid rgba(200, 160, 165, 0.15);
         }
         .check-item:last-child,
-        .wish-item:last-child {
+        .wish-item:last-child,
+        .task-item:last-child {
             border-bottom: none;
         }
         .check-star,
@@ -579,6 +591,81 @@
         .check-star:hover,
         .wish-star:hover {
             transform: scale(1.15);
+        }
+
+        .task-status {
+            font-size: 1.8rem;
+            cursor: pointer;
+            user-select: none;
+            min-width: 44px;
+            text-align: center;
+            transition: 0.2s;
+        }
+        .task-status:hover {
+            transform: scale(1.15);
+        }
+        .task-text {
+            flex: 1;
+            word-break: break-word;
+        }
+        .task-item .btn {
+            flex-shrink: 0;
+        }
+
+        .task-period-group {
+            margin-bottom: 16px;
+        }
+        .task-period-group .period-title {
+            font-weight: 600;
+            color: var(--rose-dark);
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+            border-left: 3px solid var(--rose);
+            padding-left: 8px;
+        }
+
+        .task-date-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .task-date-nav button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+        .task-date-nav button:hover {
+            background: rgba(200, 160, 165, 0.2);
+        }
+        .task-date-nav .date-label {
+            font-weight: 600;
+            font-size: 1.1rem;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .task-add-area {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .task-add-area input[type="text"] {
+            flex: 2;
+            min-width: 140px;
+        }
+        .task-add-area select {
+            flex: 1;
+            min-width: 80px;
+        }
+        .task-add-area button {
+            flex-shrink: 0;
         }
 
         .msg-bubble {
@@ -655,7 +742,7 @@
         }
         .msg-bubble .replies .msg-bubble {
             border-left-color: #e0c4c6;
-            background: rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.5);
         }
 
         .filter-group {
@@ -741,7 +828,7 @@
             max-width: 90%;
             max-height: 80vh;
             border-radius: 8px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             object-fit: contain;
         }
         .slideshow-modal .controls {
@@ -756,7 +843,7 @@
         }
         .slideshow-modal .controls button {
             pointer-events: auto;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
             font-size: 2rem;
@@ -767,7 +854,7 @@
             backdrop-filter: blur(4px);
         }
         .slideshow-modal .controls button:hover {
-            background: rgba(255,255,255,0.4);
+            background: rgba(255, 255, 255, 0.4);
         }
         .slideshow-modal .close-slideshow {
             position: absolute;
@@ -790,7 +877,7 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.3);
             transition: 0.3s;
         }
         .slideshow-modal .indicators span.active {
@@ -975,6 +1062,13 @@
                 max-width: 95%;
                 max-height: 70vh;
             }
+            .task-add-area {
+                flex-direction: column;
+            }
+            .task-add-area input,
+            .task-add-area select {
+                width: 100%;
+            }
         }
         @media (max-width: 440px) {
             .photos {
@@ -1132,6 +1226,7 @@
                         <button class="tab active" data-tab="diary">📝 日记</button>
                         <button class="tab" data-tab="checkin">☑️ 打卡</button>
                         <button class="tab" data-tab="wishes">🌟 心愿</button>
+                        <button class="tab" data-tab="tasks">🎯 任务</button>
                         <button class="tab" data-tab="messages">💌 留言</button>
                         <button class="tab" data-tab="gallery">🖼️ 回忆盒</button>
                     </div>
@@ -1188,6 +1283,29 @@
                         <button class="btn primary" id="addWishBtn">➕ 添加</button>
                     </div>
                     <div id="wishList"></div>
+                </div>
+
+                <!-- 任务面板 -->
+                <div id="panel-tasks" class="panel">
+                    <div class="card">
+                        <div class="task-date-nav">
+                            <button id="taskPrevDay">◀</button>
+                            <span class="date-label" id="taskDateLabel">今天</span>
+                            <button id="taskNextDay">▶</button>
+                            <button class="btn btn-sm" id="taskTodayBtn">今天</button>
+                        </div>
+                        <div class="task-add-area">
+                            <input type="text" id="newTaskInput" placeholder="输入任务…" />
+                            <select id="newTaskPeriod">
+                                <option value="上午">上午</option>
+                                <option value="下午">下午</option>
+                                <option value="晚上">晚上</option>
+                                <option value="其他">其他</option>
+                            </select>
+                            <button class="btn primary" id="addTaskBtn">➕ 添加</button>
+                        </div>
+                        <div id="taskList"></div>
+                    </div>
                 </div>
 
                 <!-- 留言 -->
@@ -1444,6 +1562,11 @@
         let currentSlideIndex = 0;
         let slideImages = [];
 
+        // ---- 任务相关全局变量 ----
+        let currentTaskDate = new Date(); // 当前查看的日期
+        const taskStatusMap = { 0: '☐', 1: '◐', 2: '✅' };
+        const taskStatusNext = { 0: 1, 1: 2, 2: 0 };
+
         function initApp() {
             updateTimer();
             setInterval(updateTimer, 1000);
@@ -1453,6 +1576,7 @@
             setupDiary();
             setupCheckin();
             setupWishes();
+            setupTasks(); // 新增
             setupMessages();
             setupGallery();
             refreshAll();
@@ -1555,6 +1679,7 @@
                         diary: loadDiaries,
                         checkin: loadCheckins,
                         wishes: loadWishes,
+                        tasks: loadTasks,
                         messages: loadMessages,
                         gallery: () => loadGallery(document.querySelector('.filter-btn.active')?.dataset.type || 'all')
                     };
@@ -1833,7 +1958,6 @@
             try {
                 const { data } = await supabaseClient.from('checkins').select('*').order('created_at');
                 container.innerHTML = data?.length ? '' : '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有打卡项目～ 添加一个吧 ☑️</p>';
-                // 渲染第一个项目的日历（如果有多个，可以各自显示，此处简化取第一个）
                 if (data && data.length > 0) {
                     renderCalendar(data[0].dates || []);
                 } else {
@@ -1934,6 +2058,147 @@
                 });
             } catch (err) {
                 container.innerHTML = `<p style="text-align:center;color:var(--rose-dark);">⚠️ 加载失败，请检查 Supabase 配置</p>`;
+            }
+        }
+
+        // ---- 任务系统 ----
+        function setupTasks() {
+            document.getElementById('addTaskBtn').onclick = addTask;
+            document.getElementById('newTaskInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') addTask();
+            });
+            document.getElementById('taskPrevDay').onclick = () => changeTaskDate(-1);
+            document.getElementById('taskNextDay').onclick = () => changeTaskDate(1);
+            document.getElementById('taskTodayBtn').onclick = () => {
+                currentTaskDate = new Date();
+                updateTaskDateLabel();
+                loadTasks();
+            };
+            updateTaskDateLabel();
+        }
+
+        function updateTaskDateLabel() {
+            const label = document.getElementById('taskDateLabel');
+            const today = new Date();
+            const dateStr = formatDate(currentTaskDate);
+            if (currentTaskDate.toDateString() === today.toDateString()) {
+                label.textContent = '今天 ' + dateStr;
+            } else if (currentTaskDate.toDateString() === new Date(Date.now() - 86400000).toDateString()) {
+                label.textContent = '昨天 ' + dateStr;
+            } else if (currentTaskDate.toDateString() === new Date(Date.now() + 86400000).toDateString()) {
+                label.textContent = '明天 ' + dateStr;
+            } else {
+                label.textContent = dateStr;
+            }
+        }
+
+        function formatDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth()+1).padStart(2,'0');
+            const d = String(date.getDate()).padStart(2,'0');
+            return y + '-' + m + '-' + d;
+        }
+
+        function changeTaskDate(delta) {
+            const newDate = new Date(currentTaskDate);
+            newDate.setDate(newDate.getDate() + delta);
+            currentTaskDate = newDate;
+            updateTaskDateLabel();
+            loadTasks();
+        }
+
+        async function addTask() {
+            const input = document.getElementById('newTaskInput');
+            const text = input.value.trim();
+            if (!text) return alert('请输入任务内容');
+            const period = document.getElementById('newTaskPeriod').value;
+            const dateStr = formatDate(currentTaskDate);
+            try {
+                await supabaseClient.from('tasks').insert([{
+                    date: dateStr,
+                    period: period,
+                    text: text,
+                    status: 0,
+                    author: '共同'
+                }]);
+                input.value = '';
+                loadTasks();
+            } catch (err) {
+                alert('添加任务失败：' + err.message);
+            }
+        }
+
+        async function loadTasks() {
+            const container = document.getElementById('taskList');
+            const dateStr = formatDate(currentTaskDate);
+            try {
+                const { data } = await supabaseClient.from('tasks')
+                    .select('*')
+                    .eq('date', dateStr)
+                    .order('period', { ascending: true })
+                    .order('created_at', { ascending: true });
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;color:var(--text-medium);padding:20px;">今天还没有任务，安排起来吧！💪</p>';
+                    return;
+                }
+                // 按 period 分组
+                const groups = { '上午': [], '下午': [], '晚上': [], '其他': [] };
+                data.forEach(task => {
+                    if (groups[task.period]) groups[task.period].push(task);
+                    else groups['其他'].push(task);
+                });
+                let html = '';
+                for (const [period, tasks] of Object.entries(groups)) {
+                    if (tasks.length === 0) continue;
+                    html += `<div class="task-period-group"><div class="period-title">${period}</div>`;
+                    tasks.forEach(task => {
+                        const statusSymbol = taskStatusMap[task.status] || '☐';
+                        html += `
+                            <div class="task-item" data-id="${task.id}">
+                                <span class="task-status" data-id="${task.id}">${statusSymbol}</span>
+                                <span class="task-text">${task.text}</span>
+                                <button class="btn btn-sm" style="background:#f0d3d5;color:var(--text-medium);" data-id="${task.id}">🗑️</button>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+                container.innerHTML = html;
+
+                // 绑定事件：切换状态
+                container.querySelectorAll('.task-status').forEach(el => {
+                    el.onclick = async (e) => {
+                        e.stopPropagation();
+                        const id = el.dataset.id;
+                        const currentStatus = parseInt(el.dataset.status || 0);
+                        const newStatus = taskStatusNext[currentStatus] || 0;
+                        try {
+                            await supabaseClient.from('tasks').update({ status: newStatus }).eq('id', id);
+                            loadTasks(); // 刷新列表
+                        } catch (err) {
+                            alert('更新任务状态失败：' + err.message);
+                        }
+                    };
+                });
+
+                // 绑定删除事件
+                container.querySelectorAll('.task-item .btn').forEach(btn => {
+                    btn.onclick = async (e) => {
+                        e.stopPropagation();
+                        const id = btn.dataset.id;
+                        if (confirm('确定删除这个任务吗？')) {
+                            try {
+                                await supabaseClient.from('tasks').delete().eq('id', id);
+                                loadTasks();
+                            } catch (err) {
+                                alert('删除失败：' + err.message);
+                            }
+                        }
+                    };
+                });
+
+            } catch (err) {
+                container.innerHTML = `<p style="text-align:center;color:var(--rose-dark);">⚠️ 加载失败</p>`;
             }
         }
 
@@ -2066,14 +2331,12 @@
             const container = document.getElementById('msgList');
             try {
                 const { data } = await supabaseClient.from('messages').select('*').order('created_at', { ascending: false });
-                // 构建树
                 const tree = buildMessageTree(data || []);
                 container.innerHTML = '';
                 if (tree.length === 0) {
                     container.innerHTML = '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有留言～ 写下第一句情话吧 💌</p>';
                     return;
                 }
-                // 按时间倒序排列根节点（最新在上）
                 tree.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
                 renderMessageTree(tree, container);
             } catch (err) {
@@ -2090,7 +2353,6 @@
                     loadGallery(b.dataset.type);
                 };
             });
-            // 幻灯片按钮
             document.getElementById('slideshowBtn').onclick = startSlideshow;
         }
 
@@ -2146,7 +2408,6 @@
                     }
                     grid.appendChild(item);
                 });
-                // 点击图片可触发幻灯片
                 grid.querySelectorAll('.gallery-item img').forEach((img, idx) => {
                     img.parentElement.onclick = () => {
                         const imageFiles = allFiles.filter(f => f.type?.startsWith('image/'));
@@ -2176,7 +2437,6 @@
                 if (e.key === 'ArrowLeft') changeSlide(-1);
                 if (e.key === 'ArrowRight') changeSlide(1);
             });
-            // 自动播放定时器
             let autoPlayTimer = null;
             modal.addEventListener('mouseenter', () => {
                 if (autoPlayTimer) clearInterval(autoPlayTimer);
@@ -2200,12 +2460,10 @@
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
             showSlide(currentSlideIndex);
-            // 指示器
             const ind = document.getElementById('slideIndicators');
             ind.innerHTML = slideImages.map((_, i) =>
                 `<span class="${i === currentSlideIndex ? 'active' : ''}"></span>`
             ).join('');
-            // 自动播放
             if (window._slideshowTimer) clearInterval(window._slideshowTimer);
             window._slideshowTimer = setInterval(() => changeSlide(1), 3000);
         }
@@ -2214,7 +2472,6 @@
             const img = document.getElementById('slideImage');
             img.src = slideImages[index].url;
             img.alt = slideImages[index].name;
-            // 更新指示器
             document.querySelectorAll('#slideIndicators span').forEach((el, i) => {
                 el.classList.toggle('active', i === index);
             });
@@ -2240,6 +2497,7 @@
             loadDiaries();
             loadCheckins();
             loadWishes();
+            loadTasks();
             loadMessages();
             loadGallery('all');
         }
