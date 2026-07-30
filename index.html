@@ -2889,9 +2889,11 @@
                             dates: newDates
                         }).eq('id', id);
                         
-                        // 【关键修复】不刷新整个列表，保持当前 ID 不变
+                        // 【修改】触发流星雨，然后延迟 300ms 刷新列表，彻底避开渲染冲突！
                         triggerRomanticEffect('shootingStar');
-                        loadCheckins(); 
+                        setTimeout(() => {
+                            loadCheckins(); 
+                        }, 300);
                         return;
                     }
 
@@ -2901,10 +2903,25 @@
                         dates: Object.keys(completedBy) 
                     }).eq('id', id);
                     
-                    // 【新增】双人打卡成功也必须触发流星雨
-                    triggerRomanticEffect('shootingStar');
+                    // 【极致浪漫】检测是不是第二个人完成的！
+                    const isSecondPerson = usersForToday.length === 1; 
                     
-                    loadCheckins(); 
+                    if (isSecondPerson) {
+                        // 如果是第二个人完成，触发超级浪漫组合拳！
+                        triggerRomanticEffect('celebrate'); // 先放同心烟花！
+                        // 300毫秒后，再放一场流星雨，层层叠加！
+                        setTimeout(() => {
+                            triggerRomanticEffect('shootingStar');
+                        }, 300);
+                    } else {
+                        // 如果是第一个人打卡，正常放流星雨
+                        triggerRomanticEffect('shootingStar');
+                    }
+
+                    // 【修改】延迟 300ms 刷新列表，完美避开特效执行的黄金时间
+                    setTimeout(() => {
+                        loadCheckins(); 
+                    }, 300);
                 };
 
                 // 删除事件
@@ -3796,10 +3813,7 @@
                 if (overlay) overlay.style.display = 'none';
                 effectRunning = false;
             }
-            // 强制停顿 50 毫秒以确保清理完毕
-            setTimeout(() => {
-                showEffect(type);
-            }, 50);
+            showEffect(type);
         }
         
         // 【新增这一行】必须调用应用初始化函数，才能弹出登录框！
