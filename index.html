@@ -2912,6 +2912,7 @@
                         }).eq('id', id);
                         
                         // 单人打卡
+                        console.log("🎯 打卡成功，马上就要放流星了！");
                         triggerRomanticEffect('shootingStar');
                         setTimeout(() => { loadCheckins(); }, 300);
                         return;
@@ -2930,6 +2931,7 @@
                         setTimeout(() => { triggerRomanticEffect('shootingStar'); }, 400);
                     } else {
                         // 第一个人完成
+                        console.log("🎯 打卡成功，马上就要放流星了！");
                         triggerRomanticEffect('shootingStar');
                     }
 
