@@ -1205,11 +1205,22 @@
                     <h1 class="hero-title">致我最爱的瑶瑶</h1>
                     <p style="color:var(--text-medium);">遇见你，是小亮此生最美的意外 ✨</p>
                 </div>
-                <div class="timer-box" id="timer">
-                    <div class="timer-block"><span class="timer-num" id="tDays">0</span><span class="timer-label">天</span></div>
-                    <div class="timer-block"><span class="timer-num" id="tHours">00</span><span class="timer-label">时</span></div>
-                    <div class="timer-block"><span class="timer-num" id="tMins">00</span><span class="timer-label">分</span></div>
-                    <div class="timer-block"><span class="timer-num" id="tSecs">00</span><span class="timer-label">秒</span></div>
+                
+                <!-- ===== 相识计时器（浪漫升级版） ===== -->
+                <div class="timer-box" id="timer" style="flex-direction:column; padding:20px 25px;">
+                    <div style="font-size:0.95rem; color:var(--rose-dark); font-weight:600; margin-bottom:6px; width:100%; text-align:center; letter-spacing:2px;">
+                        ✨ 这个月，也要一起写满我们的故事呀！
+                    </div>
+                    <div style="font-size:0.85rem; color:var(--text-medium); margin-bottom:14px; width:100%; text-align:center;">
+                        💕 距离我们相识，已经过去了
+                    </div>
+                    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; width:100%;">
+                        <div class="timer-block"><span class="timer-num" id="tMonths">0</span><span class="timer-label">个月</span></div>
+                        <div class="timer-block"><span class="timer-num" id="tDays">0</span><span class="timer-label">天</span></div>
+                        <div class="timer-block"><span class="timer-num" id="tHours">00</span><span class="timer-label">时</span></div>
+                        <div class="timer-block"><span class="timer-num" id="tMins">00</span><span class="timer-label">分</span></div>
+                        <div class="timer-block"><span class="timer-num" id="tSecs">00</span><span class="timer-label">秒</span></div>
+                    </div>
                 </div>
                 <div class="photos">
                     <div class="polaroid"><img src="./princess.jpg" alt="Princess" onerror="this.style.display='none'" /><p>我的小公主 👑</p></div>
@@ -1528,7 +1539,7 @@
         // ============================================================
         const SUPABASE_URL = 'https://ldqauibuqwpwwtjoihjk.supabase.co';     // 替换为你的 Supabase URL
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcWF1aWJ1cXdwd3d0am9paGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMjA5MjMsImV4cCI6MjEwMDc5NjkyM30.PxxJn1IKE4ck3WszrmPGr5gcL_j7wcmPjawHMbhlhcU';                        // 替换为你的 anon key
-        const LOVE_START = new Date('2026-07-01T00:00:00');
+        const LOVE_START = new Date('2026-07-01T14:05:00');
         const STORAGE_BUCKET = 'diary-files';
         const VOICE_BUCKET = 'voice-diary';   // 语音专用桶
 
@@ -1868,6 +1879,7 @@
             document.getElementById('app').classList.add('visible'); // 显示主应用
             updateTimer();
             setInterval(updateTimer, 1000);
+            checkLateNight(); // <--- 新增，调用深夜模式检测
             loadHearts();
             setupSceneSwitch();
             setupTabs();
@@ -1884,14 +1896,45 @@
         }
 
         // ============================================================
-        //  ⏱️ 计时器
+        //  🌙 深夜模式浪漫暗语
+        // ============================================================
+        function checkLateNight() {
+            const hour = new Date().getHours();
+            const p = document.getElementById('homeSubtitle');
+            if (hour >= 23 || hour < 6) {
+                p.textContent = '夜深了，我在想你 🌙';
+                p.style.color = 'var(--rose-dark)'; // 深夜切换为玫瑰色
+                p.style.fontWeight = '500';
+            } else {
+                p.textContent = '遇见你，是小亮此生最美的意外 ✨';
+                p.style.color = 'var(--text-medium)';
+                p.style.fontWeight = '400';
+            }
+        }
+        
+        // ============================================================
+        //  ⏱️ 相识纪念计时器（加入月份和浪漫文案）
         // ============================================================
         function updateTimer() {
             const diff = Math.max(0, Date.now() - LOVE_START);
-            document.getElementById('tDays').textContent = Math.floor(diff / 86400000);
-            document.getElementById('tHours').textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
-            document.getElementById('tMins').textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-            document.getElementById('tSecs').textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+            // 计算总秒数
+            const totalSeconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            
+            // 按照 30 天为 1 个月进行换算，展现精确度
+            const months = Math.floor(days / 30);
+            const remDays = days % 30;
+            const remHours = hours % 24;
+            const remMins = minutes % 60;
+            const secs = totalSeconds % 60;
+            
+            document.getElementById('tMonths').textContent = months;
+            document.getElementById('tDays').textContent = remDays;
+            document.getElementById('tHours').textContent = String(remHours).padStart(2, '0');
+            document.getElementById('tMins').textContent = String(remMins).padStart(2, '0');
+            document.getElementById('tSecs').textContent = String(secs).padStart(2, '0');
         }
 
         // ============================================================
@@ -2165,7 +2208,8 @@
                     uploadedFiles.push({
                         name: file.name,
                         type: file.type,
-                        url: urlData.publicUrl
+                        url: urlData.publicUrl,
+                        path: fileName
                     });
                 } catch (err) {
                     alert('上传文件失败：' + err.message);
@@ -2174,6 +2218,7 @@
             }
 
             // 上传语音
+            let voicePath = null; 
             let voiceUrl = null;
             let voiceDuration = 0;
             if (recordedBlob) {
@@ -2183,6 +2228,7 @@
                     if (error) throw error;
                     const { data: urlData } = supabaseClient.storage.from(VOICE_BUCKET).getPublicUrl(fileName);
                     voiceUrl = urlData.publicUrl;
+                    voicePath = fileName; 
                     voiceDuration = recordingSeconds;
                 } catch (err) {
                     alert('语音上传失败：' + err.message);
@@ -2195,6 +2241,7 @@
                 content,
                 files: uploadedFiles,
                 voice_url: voiceUrl,
+                voice_path: voicePath,
                 voice_duration: voiceDuration,
                 user_id: window.currentUser.id 
             };
@@ -2318,13 +2365,37 @@
                     const { data } = await supabaseClient.from('diaries').select('*').eq('id', id).single();
                     if (data) editDiary(data);
                 };
+                // 删除事件的终极完整版（包含 Storage 清理）
                 card.querySelector('.edit-btn + .btn').onclick = async (e) => {
-                    if (confirm('确定要删除这篇日记吗？')) {
-                        await supabaseClient.from('diaries').delete().eq('id', e.target.dataset.id);
-                        loadDiaries();
+                    if (!confirm('这真是一篇珍贵的记忆，确定要丢进回忆的小匣子里吗？💕')) return;
+                    
+                    const id = e.target.dataset.id;
+                    try {
+                        // 1. 先查询这篇日记在数据库里存储了什么文件路径
+                        const { data: record } = await supabaseClient.from('diaries').select('files, voice_path').eq('id', id).single();
+                        
+                        // 2. 删除图片/附件文件 (如果存在)
+                        if (record && record.files && record.files.length > 0) {
+                            const paths = record.files.map(f => f.path).filter(p => p); // 提取并过滤掉空路径
+                            if (paths.length > 0) {
+                                await supabaseClient.storage.from(STORAGE_BUCKET).remove(paths);
+                            }
+                        }
+                        
+                        // 3. 删除语音文件 (如果存在)
+                        if (record && record.voice_path) {
+                            await supabaseClient.storage.from(VOICE_BUCKET).remove([record.voice_path]);
+                        }
+                        
+                        // 4. 清理完毕，最后再删除数据库里的记录
+                        await supabaseClient.from('diaries').delete().eq('id', id);
+                        loadDiaries(); // 刷新列表
+                        
+                    } catch (err) {
+                        alert('删除过程出错，但日记已被移除：' + err.message);
                     }
                 };
-
+                
                 // 评论交互
                 const toggleBtn = card.querySelector('.toggle-comments');
                 const commentArea = card.querySelector('.comment-area');
