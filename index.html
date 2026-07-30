@@ -1204,6 +1204,7 @@
                         <button class="tab" data-tab="gallery">🖼️ 回忆盒</button>
                     </div>
                     <button class="back-btn" id="backToFront">🏠 返回</button>
+                    <button id="logoutBtn" style="background:#e8878a; border:none; border-radius:30px; padding:6px 18px; cursor:pointer; color:white; font-size:0.9rem; font-weight:bold; margin-left:6px;">🚪 退出账号</button>
                 </div>
 
                 <!-- ===== 日记面板 ===== -->
@@ -3180,6 +3181,20 @@
         
         // 【新增这一行】必须调用应用初始化函数，才能弹出登录框！
         initApp();
+        
+        // ===== 添加退出登录功能 =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async function() {
+                    // 弹出二次确认，防止误触
+                    if (confirm('确定要退出账号吗？退出后需要重新登录才能查看小秘密哦 💕')) {
+                        await supabaseClient.auth.signOut();
+                        location.reload(); // 刷新页面，回到未登录状态，触发登录弹窗
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
