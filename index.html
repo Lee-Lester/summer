@@ -3787,12 +3787,21 @@
         }
 
         // ============================================================
-        //  🎀 触发挂载点（必须整合进现有逻辑）
+        //  🎀 触发挂载点（增强防卡死版）
         // ============================================================
-        // 这个函数将由打卡和任务区的回调调用
         function triggerRomanticEffect(type) {
-            showEffect(type);
+            // 强制清理上一轮残余动画，彻底消除卡死锁！
+            if (effectRunning) {
+                const overlay = document.getElementById('effect-overlay');
+                if (overlay) overlay.style.display = 'none';
+                effectRunning = false;
+            }
+            // 强制停顿 50 毫秒以确保清理完毕
+            setTimeout(() => {
+                showEffect(type);
+            }, 50);
         }
+        
         // 【新增这一行】必须调用应用初始化函数，才能弹出登录框！
         initApp();
         
