@@ -2537,6 +2537,7 @@
 
         async function loadDiaries() {
             try {
+                // 纯净的查询：不依赖 window.currentUser.id 拼接，完全交由 RLS 自动过滤！
                 const { data } = await supabaseClient.from('diaries').select('*').order('created_at', { ascending: false });
                 allDiaries = data || [];
                 const select = document.getElementById('monthSelect');
