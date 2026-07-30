@@ -2194,11 +2194,17 @@
         //  💾 保存日记（含语音）
         // ============================================================
         async function saveDiary() {
-            // 🛡️【新增防崩盾牌】如果当前用户信息丢失，绝不执行保存，温柔提醒！
-            if (!window.currentUser || !window.currentUser.id) {
-                alert('💕 小亮/瑶瑶，登录状态好像被浏览器拦截了，刷新一下页面再保存吧！');
-                return; // 直接退出，绝不触发 400 错误
+            // 🛡️【终极防 400 盾牌】抵御非法字符串污染！
+            const uid = window.currentUser && window.currentUser.id ? window.currentUser.id : null;
+            // 严谨的 UUID 正则表达式 (匹配 8-4-4-4-12 的十六进制格式)
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            
+            // 如果 ID 不存在，或者不符合 UUID 格式，必定是 Edge 污染了数据！
+            if (!uid || !uuidRegex.test(uid)) {
+                alert('💔 糟糕！浏览器安全策略导致“拾光馆”的登录凭证失效了。\n\n请按键盘 F5 刷新页面，重新登录即可继续保存！');
+                return; // 绝对不触发发送请求，彻底规避 400！
             }
+            
             const mood = document.querySelector('.mood.selected')?.dataset.mood || '🥰';
             const content = document.getElementById('diaryContent').value.trim();
             if (!content && pendingFiles.length === 0 && !recordedBlob) {
