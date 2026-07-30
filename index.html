@@ -2264,7 +2264,7 @@
                 submitBtn.onclick = async () => {
                     const text = commentInput.value.trim();
                     if (!text) return alert('写点评论吧～');
-                    const author = prompt('署名：小亮 或 瑶瑶？', '小亮');
+                    const author = confirm('署名：点击"确定"为小亮，点击"取消"为瑶瑶') ? '小亮' : '瑶瑶';
                     if (!author) return;
                     try {
                         await supabaseClient.from('diary_comments').insert({
@@ -2313,15 +2313,13 @@
                 if (depth > 0) {
                     div.style.marginLeft = (depth * 16) + 'px';
                 }
-                const liked = (c.liked_by || []).includes('user_' + (localStorage.getItem('visitor_id') || 'guest'));
                 div.innerHTML = `
                     <div class="comment-header">
                         <div><strong>${c.author}</strong> <small>${new Date(c.created_at).toLocaleString()}</small></div>
-                        <div><span style="font-size:0.8rem;color:var(--text-medium);">❤️ ${c.likes || 0}</span></div>
+                        <!-- 移除了点赞显示 -->
                     </div>
                     <div class="comment-text">${c.text}</div>
                     <div class="comment-actions">
-                        <button class="like-btn ${liked ? 'liked' : ''}" data-id="${c.id}">${liked ? '❤️' : '🤍'} 赞</button>
                         <button class="reply-btn" data-id="${c.id}">💬 回复</button>
                     </div>
                     <div class="reply-box" data-parent="${c.id}">
@@ -2331,46 +2329,22 @@
                     <div class="replies"></div>
                 `;
                 container.appendChild(div);
-
-                div.querySelector('.like-btn').onclick = async (e) => {
-                    e.stopPropagation();
-                    const id = c.id;
-                    const likeBtn = e.currentTarget;
-                    const isLiked = likeBtn.classList.contains('liked');
-                    const likedBy = c.liked_by || [];
-                    const visitorId = 'user_' + (localStorage.getItem('visitor_id') || 'guest');
-                    let newLikedBy;
-                    if (isLiked) {
-                        newLikedBy = likedBy.filter(v => v !== visitorId);
-                    } else {
-                        newLikedBy = [...likedBy, visitorId];
-                    }
-                    const newLikes = newLikedBy.length;
-                    try {
-                        await supabaseClient.from('diary_comments').update({ likes: newLikes, liked_by: newLikedBy }).eq('id', id);
-                        const diaryId = container.closest('.card').dataset.diaryId;
-                        if (diaryId && container.closest('.card')._loadComments) {
-                            container.closest('.card')._loadComments();
-                        }
-                    } catch (err) {
-                        alert('点赞失败：' + err.message);
-                    }
-                };
-
+        
+                // 移除了点赞事件
+        
                 div.querySelector('.reply-btn').onclick = (e) => {
                     e.stopPropagation();
                     const box = div.querySelector('.reply-box');
                     box.style.display = box.style.display === 'none' ? 'flex' : 'none';
                     if (box.style.display === 'flex') box.querySelector('input').focus();
                 };
-
+        
                 div.querySelector('.submit-reply').onclick = async (e) => {
                     e.stopPropagation();
                     const input = div.querySelector('.reply-box input');
                     const text = input.value.trim();
                     if (!text) return alert('写点回复吧～');
-                    const author = prompt('署名：', '小亮');
-                    if (!author) return;
+                    const author = confirm('署名：点击"确定"为小亮，点击"取消"为瑶瑶') ? '小亮' : '瑶瑶';
                     try {
                         const diaryId = container.closest('.card').dataset.diaryId;
                         await supabaseClient.from('diary_comments').insert({
@@ -2390,7 +2364,7 @@
                         alert('回复失败：' + err.message);
                     }
                 };
-
+        
                 if (c.children && c.children.length > 0) {
                     const repliesContainer = div.querySelector('.replies');
                     renderCommentTree(c.children, repliesContainer, depth + 1);
@@ -2772,7 +2746,7 @@
             document.getElementById('sendMsgBtn').onclick = async () => {
                 const text = document.getElementById('newMsg').value.trim();
                 if (!text) return alert('写点啥吧～');
-                const author = prompt('署名：小亮 或 瑶瑶？', '小亮');
+                const author = confirm('署名：点击"确定"为小亮，点击"取消"为瑶瑶') ? '小亮' : '瑶瑶';
                 if (!author) return;
                 try {
                     await supabaseClient.from('messages').insert([{ text, author, parent_id: null, likes: 0,
@@ -2807,17 +2781,13 @@
                     div.style.marginLeft = (depth * 16) + 'px';
                     div.style.borderLeftColor = '#e0c4c6';
                 }
-                const liked = (m.liked_by || []).includes('user_' + (localStorage.getItem('visitor_id') || 'guest'));
                 div.innerHTML = `
                     <div class="msg-header">
                         <div><strong>${m.author || '匿名'}</strong> <small>${new Date(m.created_at).toLocaleString()}</small></div>
-                        <div>
-                            <span style="color:var(--text-medium);font-size:0.8rem;">❤️ ${m.likes || 0}</span>
-                        </div>
+                        <!-- 移除了点赞显示 -->
                     </div>
                     <p>${m.text}</p>
                     <div class="msg-actions">
-                        <button class="like-btn ${liked ? 'liked' : ''}" data-id="${m.id}">${liked ? '❤️' : '🤍'} 赞</button>
                         <button class="reply-btn" data-id="${m.id}">💬 回复</button>
                     </div>
                     <div class="reply-box" id="reply-box-${m.id}">
@@ -2827,30 +2797,9 @@
                     <div class="replies"></div>
                 `;
                 container.appendChild(div);
-
-                div.querySelector('.like-btn').onclick = async (e) => {
-                    e.stopPropagation();
-                    const id = m.id;
-                    const likeBtn = e.currentTarget;
-                    const isLiked = likeBtn.classList.contains('liked');
-                    const likedBy = m.liked_by || [];
-                    const visitorId = 'user_' + (localStorage.getItem('visitor_id') || 'guest');
-                    let newLikedBy;
-                    if (isLiked) {
-                        newLikedBy = likedBy.filter(v => v !== visitorId);
-                    } else {
-                        newLikedBy = [...likedBy, visitorId];
-                    }
-                    const newLikes = newLikedBy.length;
-                    try {
-                        await supabaseClient.from('messages').update({ likes: newLikes, liked_by: newLikedBy }).eq(
-                        'id', id);
-                        loadMessages();
-                    } catch (err) {
-                        alert('点赞失败：' + err.message);
-                    }
-                };
-
+        
+                // 移除了点赞事件
+        
                 div.querySelector('.reply-btn').onclick = (e) => {
                     e.stopPropagation();
                     const box = div.querySelector('.reply-box');
@@ -2859,14 +2808,13 @@
                         box.querySelector('input').focus();
                     }
                 };
-
+        
                 div.querySelector('.submit-reply').onclick = async (e) => {
                     e.stopPropagation();
                     const input = div.querySelector('.reply-box input');
                     const text = input.value.trim();
                     if (!text) return alert('写点回复吧～');
-                    const author = prompt('署名：', '小亮');
-                    if (!author) return;
+                    const author = confirm('署名：点击"确定"为小亮，点击"取消"为瑶瑶') ? '小亮' : '瑶瑶';
                     try {
                         await supabaseClient.from('messages').insert({
                             text,
@@ -2882,7 +2830,7 @@
                         alert('回复失败：' + err.message);
                     }
                 };
-
+        
                 if (m.children && m.children.length > 0) {
                     const repliesContainer = div.querySelector('.replies');
                     renderMessageTree(m.children, repliesContainer, depth + 1);
