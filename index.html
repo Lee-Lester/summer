@@ -1106,6 +1106,86 @@
             font-weight: 600;
         }
 
+
+        /* ===== 浪漫风格评论 ===== */
+        .diary-comments button,
+        .diary-comments input,
+        .comment-item button,
+        .comment-item input,
+        .msg-bubble button,
+        .msg-bubble input {
+            outline: none !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        
+        .comment-input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        .comment-input-row input {
+            flex: 1;
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1.5px solid #f0d3d5 !important;
+            background: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            outline: none;
+            transition: 0.3s;
+        }
+        .comment-input-row input:focus {
+            border-color: var(--rose) !important;
+            box-shadow: 0 0 0 3px rgba(232,135,138,0.1);
+        }
+        .comment-input-row button {
+            padding: 8px 20px;
+            border-radius: 30px;
+            background: var(--rose);
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .comment-input-row button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(232,135,138,0.3);
+        }
+        .comment-actions button,
+        .msg-actions button {
+            background: transparent;
+            border: 1px solid #f0d3d5 !important;
+            border-radius: 30px;
+            padding: 4px 14px;
+            font-size: 0.8rem;
+            color: var(--text-medium);
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .comment-actions button:hover,
+        .msg-actions button:hover {
+            background: var(--rose-light);
+            border-color: var(--rose) !important;
+            color: var(--rose-dark);
+        }
+        .reply-box input {
+            border: 1px solid #f0d3d5 !important;
+            border-radius: 20px;
+            padding: 6px 12px;
+            outline: none;
+        }
+        .reply-box button {
+            background: var(--rose);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 16px;
+            cursor: pointer;
+        }
+
+        
         /* 响应式 */
         @media (max-width: 700px) {
             .timer-box { gap: 10px; padding: 16px 20px; }
@@ -1407,7 +1487,7 @@
 
         // 歌单（请替换为你的音乐链接）
         const songList = [{
-            name: '我想你',
+            name: '我想念',
             artist: '汪苏泷',
             src: 'https://ldqauibuqwpwwtjoihjk.supabase.co/storage/v1/object/public/music/Wang%20Sulong%20I%20miss%20you.mp3'
         }, {
@@ -1553,24 +1633,36 @@
         }
 
         function prevSong() {
-            if (playMode === 2) { playRandomSong(); return; }
+            if (songList.length === 0) return;
+            if (playMode === 2) {
+                playRandomSong();
+                return;
+            }
             let idx = currentSongIndex - 1;
             if (idx < 0) idx = songList.length - 1;
             playSong(idx);
         }
 
         function nextSong() {
-            if (playMode === 2) { playRandomSong(); return; }
+            if (songList.length === 0) return;
+            if (playMode === 2) {
+                playRandomSong();
+                return;
+            }
             let idx = currentSongIndex + 1;
             if (idx >= songList.length) idx = 0;
             playSong(idx);
         }
 
         function playRandomSong() {
+            if (songList.length <= 1) {
+                playSong(0);
+                return;
+            }
             let newIdx;
             do {
                 newIdx = Math.floor(Math.random() * songList.length);
-            } while (newIdx === currentSongIndex && songList.length > 1);
+            } while (newIdx === currentSongIndex);
             playSong(newIdx);
         }
 
@@ -1651,9 +1743,12 @@
         audio.addEventListener('timeupdate', updateProgress);
         audio.addEventListener('loadedmetadata', updateProgress);
         audio.addEventListener('ended', function() {
-            if (playMode === 1) return;
-            if (playMode === 2) playRandomSong();
-            else nextSong();
+            if (playMode === 1) return; // 单曲循环由 audio.loop 处理
+            if (playMode === 2) {
+                playRandomSong();
+            } else {
+                nextSong();
+            }
         });
 
         window.addEventListener('load', () => {
@@ -2921,7 +3016,7 @@
                 }
             });
         }
-
+        
         function startSlideshow(startIndex = 0) {
             const imageFiles = allGalleryFiles.filter(f => f.type?.startsWith('image/'));
             if (imageFiles.length === 0) {
@@ -2929,17 +3024,20 @@
                 return;
             }
             slideImages = imageFiles;
-            currentSlideIndex = startIndex % slideImages.length;
+            // 确保 startIndex 在有效范围内
+            currentSlideIndex = Math.max(0, Math.min(startIndex, slideImages.length - 1));
             const modal = document.getElementById('slideshowModal');
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
             showSlide(currentSlideIndex);
+            // 指示器
             const ind = document.getElementById('slideIndicators');
             ind.innerHTML = slideImages.map((_, i) =>
                 `<span class="${i === currentSlideIndex ? 'active' : ''}"></span>`
             ).join('');
-            if (window._slideshowTimer) clearInterval(window._slideshowTimer);
-            window._slideshowTimer = setInterval(() => changeSlide(1), 3000);
+            // 清除旧定时器，启动新定时器
+            clearSlideshowTimer();
+            slideshowTimer = setInterval(() => changeSlide(1), 3000);
         }
 
         function showSlide(index) {
@@ -2952,18 +3050,27 @@
         }
 
         function changeSlide(delta) {
-            currentSlideIndex = (currentSlideIndex + delta + slideImages.length) % slideImages.length;
+            if (!slideImages.length) return;
+            // 正确循环
+            let newIndex = currentSlideIndex + delta;
+            if (newIndex < 0) newIndex = slideImages.length - 1;
+            if (newIndex >= slideImages.length) newIndex = 0;
+            currentSlideIndex = newIndex;
             showSlide(currentSlideIndex);
         }
 
+        function clearSlideshowTimer() {
+            if (slideshowTimer) {
+                clearInterval(slideshowTimer);
+                slideshowTimer = null;
+            }
+        }        
+        
         function closeSlideshow() {
             const modal = document.getElementById('slideshowModal');
             modal.classList.remove('active');
             document.body.style.overflow = '';
-            if (window._slideshowTimer) {
-                clearInterval(window._slideshowTimer);
-                window._slideshowTimer = null;
-            }
+            clearSlideshowTimer();
         }
 
         // ============================================================
