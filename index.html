@@ -2194,6 +2194,11 @@
         //  💾 保存日记（含语音）
         // ============================================================
         async function saveDiary() {
+            // 🛡️【新增防崩盾牌】如果当前用户信息丢失，绝不执行保存，温柔提醒！
+            if (!window.currentUser || !window.currentUser.id) {
+                alert('💕 小亮/瑶瑶，登录状态好像被浏览器拦截了，刷新一下页面再保存吧！');
+                return; // 直接退出，绝不触发 400 错误
+            }
             const mood = document.querySelector('.mood.selected')?.dataset.mood || '🥰';
             const content = document.getElementById('diaryContent').value.trim();
             if (!content && pendingFiles.length === 0 && !recordedBlob) {
@@ -2537,6 +2542,12 @@
 
         async function loadDiaries() {
             try {
+                // 🛡️【新增防崩盾牌】如果当前用户信息丢失，连网络请求都不发，彻底断了 401 报错！
+                if (!window.currentUser || !window.currentUser.id) {
+                    // 这里不弹窗打扰用户，直接静默退出，等待页面重新加载或登录
+                    return; 
+                }
+                
                 // 纯净的查询：不依赖 window.currentUser.id 拼接，完全交由 RLS 自动过滤！
                 const { data } = await supabaseClient.from('diaries').select('*').order('created_at', { ascending: false });
                 allDiaries = data || [];
