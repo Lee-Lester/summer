@@ -2890,6 +2890,7 @@
                         }).eq('id', id);
                         
                         // 【关键修复】不刷新整个列表，保持当前 ID 不变
+                        triggerRomanticEffect('shootingStar');
                         loadCheckins(); 
                         return;
                     }
@@ -3085,6 +3086,20 @@
                         const newStatus = taskStatusNext[currentStatus] || 0;
                         try {
                             await supabaseClient.from('tasks').update({ status: newStatus }).eq('id', id);
+                            // 检查今日任务是否已全部完成
+                            const todayStr = formatDate(new Date());
+                            const { data: dailyTasks } = await supabaseClient.from('tasks')
+                                .select('status')
+                                .eq('date', todayStr);
+                            
+                            if (dailyTasks && dailyTasks.length > 0) {
+                                const allDone = dailyTasks.every(t => t.status === 2);
+                                const todayKey = `celeb_${todayStr}`;
+                                if (allDone && !taskCelebratedToday[todayKey]) {
+                                    taskCelebratedToday[todayKey] = true;
+                                    triggerRomanticEffect('celebrate'); // 触发同心绽放特效
+                                }
+                            }
                             loadTasks();
                         } catch (err) {
                             alert('更新任务状态失败：' + err.message);
