@@ -1268,9 +1268,10 @@
                     <div class="card" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
                         <input type="text" id="newCheckItem" placeholder="新建打卡项目，例如：晚安吻 💋" style="flex:2; min-width:160px;" />
                         
-                        <select id="checkTypeSelect" style="flex:0.5; min-width:80px; padding:8px 12px; border-radius:30px; border:1.5px solid #f0d3d5; background:white; outline:none;">
-                            <option value="个人">👤 个人</option>
-                            <option value="双人" selected>💕 双人</option>
+                        <select id="checkTypeSelect" style="flex:1; min-width:120px; padding:8px 14px; border-radius:30px; border:1.5px solid #f0d3d5; background:white; outline:none; font-weight:600; color:var(--text-medium);">
+                            <option value="双人">💕 双人任务</option>
+                            <option value="5297b0e6-f74c-49a4-8a93-c528734f93b8">💙 小亮</option>
+                            <option value="5ba2b3c0-f509-45b6-b177-52f18278ef79">💗 瑶瑶</option>
                         </select>
 
                         <select id="checkAssignSelect" style="flex:0.5; min-width:80px; padding:8px 12px; border-radius:30px; border:1.5px solid #f0d3d5; background:white; outline:none; display:none;">
@@ -1304,12 +1305,27 @@
                 <!-- ===== 任务面板 ===== -->
                 <div id="panel-tasks" class="panel">
                     <div class="card">
+                        <!-- ===== 新增：月度任务进度统计（点击展开/折叠） ===== -->
+                        <div style="margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="document.getElementById('taskStatsArea').style.display = document.getElementById('taskStatsArea').style.display === 'none' ? 'block' : 'none'">
+                                <span style="font-weight:600; color:var(--rose-dark);">📊 月度任务进度统计 <span style="font-size:0.8rem;color:var(--text-medium);font-weight:400;">（点击展开/折叠）</span></span>
+                                <span>▶</span>
+                            </div>
+                            <!-- 默认隐藏的日历区 -->
+                            <div id="taskStatsArea" style="display:none; margin-top:10px; padding:12px; background: rgba(255,255,255,0.4); border-radius:16px;">
+                                <div id="taskCalendarContainer"></div>
+                            </div>
+                        </div>
+
+                        <!-- ===== 原有的日期导航 ===== -->
                         <div class="task-date-nav">
                             <button id="taskPrevDay">◀</button>
                             <span class="date-label" id="taskDateLabel">今天</span>
                             <button id="taskNextDay">▶</button>
                             <button class="btn btn-sm" id="taskTodayBtn">今天</button>
                         </div>
+
+                        <!-- ===== 原有的添加任务区域 ===== -->
                         <div class="task-add-area">
                             <input type="text" id="newTaskInput" placeholder="输入任务…" />
                             <select id="newTaskPeriod">
@@ -1320,6 +1336,8 @@
                             </select>
                             <button class="btn primary" id="addTaskBtn">➕ 添加</button>
                         </div>
+                        
+                        <!-- ===== 原有的任务列表 ===== -->
                         <div id="taskList"></div>
                     </div>
                 </div>
@@ -2485,41 +2503,43 @@
         let selectedCheckinId = null;
 
         function setupCheckin() {
-            // 切换任务类型时隐藏/显示分配对象
-            document.getElementById('checkTypeSelect').addEventListener('change', function() {
-                const isPersonal = this.value === '个人';
-                document.getElementById('checkAssignSelect').style.display = isPersonal ? 'inline-block' : 'none';
-            });
-            document.getElementById('checkTypeSelect').dispatchEvent(new Event('change')); // 初始化触发一次
-
             // 添加打卡项目
             document.getElementById('addCheckBtn').onclick = async () => {
                 const title = document.getElementById('newCheckItem').value.trim();
-                const type = document.getElementById('checkTypeSelect').value;
+                // 获取下拉框的值
+                const assignVal = document.getElementById('checkTypeSelect').value;
+                
+                if (!title) return alert('请输入打卡项目名称');
+                
+                let type = '个人';
                 let assigned_to = null;
-                if (type === '个人') {
-                    assigned_to = document.getElementById('checkAssignSelect').value;
+                
+                // 根据下拉框的值判断任务类型和分配给谁
+                if (assignVal === '双人') {
+                    type = '双人';
+                } else {
+                    type = '个人';
+                    assigned_to = assignVal; // 这里直接赋值为 UUID
                 }
 
-                if (!title) return alert('请输入打卡项目名称');
                 try {
                     await supabaseClient.from('checkins').insert([{ 
                         title, 
                         type,
                         assigned_to,
                         streak: 0, 
-                        dates: [], // 兼容老日历字段
-                        completed_by: {}, // 专门用于记录谁打卡了
+                        dates: [],
+                        completed_by: {},
                         user_id: window.currentUser.id  
                     }]);
                     document.getElementById('newCheckItem').value = '';
-                    loadCheckins();
+                    loadCheckins(); // 刷新列表
                 } catch (err) {
                     alert('添加失败：' + err.message);
                 }
             };
 
-            // 下拉框切换任务查看日历
+            // 下拉选择框切换查看任务
             document.getElementById('checkinTaskSelect').addEventListener('change', function() {
                 const selectedId = this.value;
                 if (!selectedId) {
@@ -2528,21 +2548,63 @@
                 }
                 selectedCheckinId = selectedId;
                 renderCalendarForSelectedTask(selectedId);
+                loadCheckins(); // 刷新下方列表，只展示当前选中任务
             });
+        }
+
+        // 节日配置字典（支持动态节日计算，如母亲节/父亲节）
+        function getHolidays(year, month, day) {
+            const date = new Date(year, month - 1, day);
+            const dayOfWeek = date.getDay(); // 0是周日
+            const m = month, d = day;
+
+            // 固定公历节日
+            const fixedHolidays = {
+                '1-1': '🎆 元旦', '2-14': '🌹 情人节', '3-8': '🌸 妇女节', '4-1': '🤡 愚人节',
+                '5-1': '💪 劳动节', '6-1': '🧒 儿童节', '10-1': '🇨🇳 国庆节', 
+                '12-25': '🎄 圣诞节', '8-15': '🥮 中秋节' // 2026年中秋是公历9月25日，这里暂做提示，后面覆盖
+            };
+            
+            // 农历节日（动态年份计算较麻烦，这里先将 2026 年重要农历节日转为公历硬编码）
+            // 2026年农历日期映射 (仅列举关键节日)
+            const lunarHolidays2026 = {
+                '2-14': '💘 情人节', // 实际是公历，保留
+                '9-25': '🥮 中秋节', // 2026年农历八月十五
+                '8-19': '🌙 七夕节', // 2026年农历七月初七
+                '2-17': '🧧 春节',   // 2026年农历正月初一
+                '2-18': '🧧 初二', '2-19': '🧧 初三'
+            };
+            
+            let holiday = fixedHolidays[`${m}-${d}`] || lunarHolidays2026[`${m}-${d}`] || '';
+            
+            // 动态节日：母亲节（5月第二个星期日）
+            if (m === 5 && d >= 8 && d <= 14 && dayOfWeek === 0) {
+                // 判断是否为第二个周日
+                const firstDay = new Date(year, 4, 1).getDay(); // 5月1日星期几
+                const secondSunday = firstDay === 0 ? 8 : 15 - firstDay; // 计算出来
+                if (d === secondSunday) holiday = '🌺 母亲节';
+            }
+            // 父亲节（6月第三个星期日）
+            if (m === 6 && d >= 15 && d <= 21 && dayOfWeek === 0) {
+                const firstDay = new Date(year, 5, 1).getDay();
+                const thirdSunday = firstDay === 0 ? 15 : 22 - firstDay;
+                if (d === thirdSunday) holiday = '👔 父亲节';
+            }
+            return holiday;
         }
 
         async function renderCalendarForSelectedTask(taskId) {
             try {
                 const { data } = await supabaseClient.from('checkins').select('dates, completed_by, title, type').eq('id', taskId).single();
                 if (data) {
-                    renderCalendar(data.dates || [], data.completed_by || {}, data.title, data.type);
+                    renderCalendar(data.dates || [], data.completed_by || {}, data.title, data.type, taskId);
                 }
             } catch (err) {
                 console.error('获取单任务日历失败', err);
             }
         }
 
-        function renderCalendar(dates, completedBy = {}, taskTitle = '', type = '个人') {
+        function renderCalendar(dates, completedBy = {}, taskTitle = '', type = '个人', taskId = null) {
             const container = document.getElementById('checkinCalendarContainer');
             const now = new Date();
             const year = now.getFullYear();
@@ -2552,12 +2614,17 @@
             const todayStr = new Date().toISOString().split('T')[0];
 
             const label = taskTitle ? `${taskTitle} (${type === '双人' ? '💕共同' : '👤个人'})` : '打卡记录';
-            let html = `<div style="margin-bottom:8px;font-size:0.9rem;font-weight:600;color:var(--rose-dark);">📅 ${label}</div>`;
-            html += `<div style="display:grid; grid-template-columns: repeat(7,1fr); gap:6px; background:white; padding:16px; border-radius:16px; box-shadow: var(--shadow);">`;
+            let html = `<div style="margin-bottom:10px;font-size:0.9rem;font-weight:600;color:var(--rose-dark);display:flex;justify-content:space-between;">
+                <span>📅 ${label}</span>
+                <span style="font-size:0.75rem;font-weight:400;color:var(--text-medium);">点击已过去的日期可补打卡</span>
+            </div>`;
+            
+            html += `<div style="display:grid; grid-template-columns: repeat(7,1fr); gap:8px; background: rgba(255,255,255,0.7); backdrop-filter: blur(4px); padding:20px 14px; border-radius:20px; box-shadow: var(--shadow); border:1px solid rgba(255,255,255,0.8);">`;
             
             ['日', '一', '二', '三', '四', '五', '六'].forEach(day => {
-                html += `<div style="text-align:center;font-size:0.75rem;color:var(--text-medium);font-weight:600;">${day}</div>`;
+                html += `<div style="text-align:center;font-size:0.75rem;color:var(--text-medium);font-weight:600;margin-bottom:4px;">${day}</div>`;
             });
+            
             for (let i = 0; i < firstDay; i++) {
                 html += `<div></div>`;
             }
@@ -2567,45 +2634,61 @@
             for (let d = 1; d <= daysInMonth; d++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const isToday = dateStr === todayStr;
+                // 过去日期（包含今天）
+                const isPastOrToday = dateStr <= todayStr;
+                
                 const hasCheck = dateSet.has(dateStr);
                 let completedUsers = completedBy[dateStr] || [];
                 
-                let bgStyle = '';
-                let content = `<span style="font-size:0.9rem;color:var(--text-medium);">${d}</span>`;
+                // 获取节日信息
+                const holidayText = getHolidays(year, month + 1, d);
+                
+                let bgStyle = 'background: #ffffff;';
+                let content = `<span style="font-size:0.95rem;color:var(--text-medium);">${d}</span>`;
+                let cursorStyle = 'cursor: default;';
+                let clickEvent = '';
 
-                // 核心打卡显示逻辑（❤️ 一颗心，💕 两颗心）
+                // 核心打卡显示逻辑
                 if (type === '双人') {
                     if (completedUsers.length === 2) {
-                        bgStyle = 'background: #fce8e6; border: 1px solid #e8878a;';
-                        content = `<span style="font-size:1.4rem;color:#e8878a;">💕</span>`;
+                        bgStyle = 'background: linear-gradient(135deg, #fce8e6, #ffeae9); border: 1px solid #e8878a;';
+                        content = `<span style="font-size:1.4rem;">💕</span>`;
                     } else if (completedUsers.length === 1) {
-                        bgStyle = 'background: #fff6f5; border: 1px solid #e8878a;';
+                        bgStyle = 'background: #fdf5f3; border: 1px solid #e8878a;';
                         content = `<span style="font-size:1.3rem;color:#e8878a;">❤️</span>`;
                     }
                 } else {
-                    // 个人版
                     if (hasCheck) {
-                        bgStyle = 'background: #fce8e6; border: 1px solid #e8878a;';
+                        bgStyle = 'background: #fef7f5; border: 1px solid #e8878a;';
                         content = `<span style="font-size:1.2rem;color:#e8878a;">❤️</span>`;
                     }
                 }
 
-                // 标记“今天”的边框
-                if (isToday && bgStyle === '') {
-                    bgStyle = 'border: 2px solid #e8878a; background: #ffffff;';
-                    content = `<span style="font-size:1rem;font-weight:bold;color:var(--rose-dark);">${d}</span>`;
-                } else if (isToday) {
-                    // 如果今天是打卡日，保留原背景，加上特殊外框表示今天
-                    bgStyle += ' border: 2px solid #c96b6e;';
+                // 如果是过去日期且未完成，允许点击补打卡
+                if (isPastOrToday && taskId) {
+                    const isCompleted = (type === '个人' && hasCheck) || (type === '双人' && completedUsers.length >= 2);
+                    if (!isCompleted) {
+                        cursorStyle = 'cursor: pointer;';
+                        clickEvent = `onclick="clickDateToCheckin('${taskId}', '${dateStr}', '${type}')"`;
+                    }
+                }
+
+                // 如果当天是节日，在底部显示节日文字
+                const holidayHtml = holidayText ? `<div style="font-size:0.55rem;color:var(--rose-dark);font-weight:600;margin-top:2px;line-height:1.1;">${holidayText}</div>` : '';
+
+                // 标记“今天”的醒目边框 + 爱心点缀
+                if (isToday) {
+                    bgStyle = bgStyle + ' border: 2px solid #c96b6e;';
                 }
 
                 html += `
                     <div style="
-                        text-align:center;padding:6px 0;border-radius:8px;
-                        aspect-ratio: 1/1; display:flex; align-items:center; justify-content:center;
-                        ${bgStyle}
-                    ">
+                        text-align:center;padding:6px 4px;border-radius:12px;
+                        display:flex; flex-direction:column; align-items:center; justify-content:center;
+                        aspect-ratio: 1/1; ${bgStyle}; ${cursorStyle}; transition: all 0.2s;
+                    " ${clickEvent} onmouseenter="this.style.transform='scale(1.05)'" onmouseleave="this.style.transform='scale(1)'">
                         ${content}
+                        ${holidayHtml}
                     </div>
                 `;
             }
@@ -2613,11 +2696,58 @@
             container.innerHTML = html;
         }
 
+        // 【新增】日历打卡触发函数
+        async function clickDateToCheckin(taskId, targetDateStr, type) {
+            if (!taskId) return;
+            const { data } = await supabaseClient.from('checkins').select('*').eq('id', taskId).single();
+            let completedBy = data.completed_by || {};
+            let usersForToday = completedBy[targetDateStr] || [];
+
+            if (type === '双人') {
+                if (usersForToday.length >= 2) return; 
+                const currentUserId = window.currentUser.id;
+                if (!usersForToday.includes(currentUserId)) {
+                    usersForToday.push(currentUserId);
+                    completedBy[targetDateStr] = usersForToday;
+                }
+            } else {
+                // 单人打卡
+                const dateStr = targetDateStr;
+                const newDates = data.dates || [];
+                if (!newDates.includes(dateStr)) {
+                    newDates.push(dateStr);
+                }
+                // 如果补的是今天的卡，顺便更新连续天数
+                const todayStr = new Date().toISOString().split('T')[0];
+                let updateObj = { dates: newDates };
+                if (dateStr === todayStr) {
+                    const todayDate = new Date().toDateString();
+                    const lastDate = data.last_date ? new Date(data.last_date).toDateString() : '';
+                    const yesterday = new Date(Date.now() - 86400000).toDateString();
+                    const newStreak = (lastDate === yesterday) ? (data.streak || 0) + 1 : (lastDate === todayDate ? data.streak : 1);
+                    updateObj.streak = newStreak;
+                    updateObj.last_date = new Date().toISOString();
+                }
+                await supabaseClient.from('checkins').update(updateObj).eq('id', taskId);
+                loadCheckins();
+                return;
+            }
+            // 双人保存
+            await supabaseClient.from('checkins').update({
+                completed_by: completedBy,
+                dates: Object.keys(completedBy) 
+            }).eq('id', taskId);
+            loadCheckins();
+        }
+
         async function loadCheckins() {
             const listContainer = document.getElementById('checkinList');
             const selectEl = document.getElementById('checkinTaskSelect');
             try {
                 const { data } = await supabaseClient.from('checkins').select('*').order('created_at');
+                
+                // 1. 填充下拉框
+                const currentVal = selectEl.value;
                 selectEl.innerHTML = '<option value="">-- 请选择一项打卡任务 --</option>';
                 
                 if (!data || data.length === 0) {
@@ -2633,126 +2763,120 @@
                     selectEl.appendChild(opt);
                 });
                 
-                if (data.length > 0) {
+                // 2. 保持当前选中的 ID 不变（解决打卡后跳回第一个的 Bug）
+                if (currentVal && data.some(c => c.id === currentVal)) {
+                    selectEl.value = currentVal;
+                    selectedCheckinId = currentVal;
+                } else {
+                    // 如果当前选中的值失效，则默认选中第一个
                     selectEl.value = data[0].id;
                     selectedCheckinId = data[0].id;
-                    renderCalendarForSelectedTask(selectedCheckinId);
+                }
+                
+                // 更新对应任务的日历
+                renderCalendarForSelectedTask(selectedCheckinId);
+
+                // 3. 渲染列表：只显示当前选中的这一个任务！
+                listContainer.innerHTML = '';
+                const currentTask = data.find(c => c.id === selectedCheckinId);
+                if (!currentTask) return;
+
+                const c = currentTask;
+                const todayStr = new Date().toISOString().split('T')[0];
+                
+                // 判断今日是否打卡
+                let doneToday = false;
+                if (c.type === '个人') {
+                    const today = new Date().toDateString();
+                    const lastDate = c.last_date ? new Date(c.last_date).toDateString() : '';
+                    doneToday = lastDate === today;
+                } else if (c.type === '双人') {
+                    const users = (c.completed_by && c.completed_by[todayStr]) || [];
+                    doneToday = users && users.length > 0;
                 }
 
-                listContainer.innerHTML = '';
-                data?.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'check-item';
+                div.dataset.id = c.id;
+                div.style.cursor = 'pointer';
+                
+                // 显示打卡状态标记 (❤️ 为一人，💕 为两人，单人打卡统一❤️)
+                let icon = '☆';
+                let displayColor = '';
+                if (c.type === '个人') {
+                    icon = doneToday ? '❤️' : '☆';
+                    displayColor = doneToday ? 'color:var(--rose-dark);' : '';
+                } else if (c.type === '双人') {
+                    const users = (c.completed_by && c.completed_by[todayStr]) || [];
+                    if (users && users.length === 2) { icon = '💕'; displayColor = 'color:var(--rose-dark);'; }
+                    else if (users && users.length === 1) { icon = '❤️'; displayColor = 'color:var(--rose-dark);'; }
+                    else { icon = '🤍'; displayColor = 'color:var(--text-medium);'; }
+                }
+
+                div.innerHTML = `
+                    <span class="check-star" data-id="${c.id}" data-type="${c.type}" style="${displayColor}">${icon}</span>
+                    <span style="flex:1;word-break:break-word;">${c.title}</span>
+                    <span style="font-size:0.8rem;color:var(--text-medium);white-space:nowrap;">🔥 ${c.streak || 0} 天</span>
+                    <button class="btn btn-sm" style="background:#f0d3d5;color:var(--text-medium);" data-id="${c.id}">🗑️</button>
+                `;
+                listContainer.appendChild(div);
+
+                // 打卡事件绑定
+                div.querySelector('.check-star').onclick = async (e) => {
+                    e.stopPropagation();
+                    const id = e.target.dataset.id;
+                    const type = e.target.dataset.type;
+                    const { data } = await supabaseClient.from('checkins').select('*').eq('id', id).single();
+
                     const todayStr = new Date().toISOString().split('T')[0];
-                    // 判断今日是否打卡
-                    let doneToday = false;
-                    if (c.type === '个人') {
-                        const today = new Date().toDateString();
-                        const lastDate = c.last_date ? new Date(c.last_date).toDateString() : '';
-                        doneToday = lastDate === today;
-                    } else if (c.type === '双人') {
-                        const users = (c.completed_by && c.completed_by[todayStr]) || [];
-                        doneToday = users && users.length > 0;
-                    }
+                    let completedBy = data.completed_by || {};
+                    let usersForToday = completedBy[todayStr] || [];
 
-                    const div = document.createElement('div');
-                    div.className = 'check-item';
-                    div.dataset.id = c.id;
-                    div.style.cursor = 'pointer';
-                    
-                    // 显示打卡状态标记 (❤️ 为一人，💕 为两人)
-                    let icon = '☆';
-                    let displayColor = '';
-                    if (c.type === '个人') {
-                        icon = doneToday ? '⭐' : '☆';
-                    } else if (c.type === '双人') {
-                        const users = (c.completed_by && c.completed_by[todayStr]) || [];
-                        if (users && users.length === 2) { icon = '💕'; displayColor = 'color:var(--rose-dark);'; }
-                        else if (users && users.length === 1) { icon = '❤️'; displayColor = 'color:var(--rose-dark);'; }
-                        else { icon = '🤍'; displayColor = 'color:var(--text-medium);'; }
-                    }
-
-                    div.innerHTML = `
-                        <span class="check-star" data-id="${c.id}" data-type="${c.type}" style="${displayColor}">${icon}</span>
-                        <span style="flex:1;word-break:break-word; font-weight:${selectedCheckinId === c.id ? 'bold; color:var(--rose-dark);' : ''}">${c.title}</span>
-                        <span style="font-size:0.8rem;color:var(--text-medium);white-space:nowrap;">🔥 ${c.streak || 0} 天</span>
-                        <button class="btn btn-sm" style="background:#f0d3d5;color:var(--text-medium);" data-id="${c.id}">🗑️</button>
-                    `;
-                    listContainer.appendChild(div);
-                });
-
-                listContainer.querySelectorAll('.check-item').forEach(item => {
-                    item.addEventListener('click', function(e) {
-                        if (e.target.tagName === 'BUTTON') return;
-                        const id = this.dataset.id;
-                        selectEl.value = id;
-                        selectedCheckinId = id;
-                        renderCalendarForSelectedTask(id);
-                        loadCheckins();
-                    });
-                });
-
-                // 点击打卡星星/心形
-                document.querySelectorAll('.check-star').forEach(s => {
-                    s.onclick = async (e) => {
-                        e.stopPropagation();
-                        const id = e.target.dataset.id;
-                        const type = e.target.dataset.type;
-                        const { data } = await supabaseClient.from('checkins').select('*').eq('id', id).single();
-
-                        const todayStr = new Date().toISOString().split('T')[0];
-                        let completedBy = data.completed_by || {};
-                        let usersForToday = completedBy[todayStr] || [];
-
-                        if (type === '双人') {
-                            // 如果已经两人都打卡了，不能再点
-                            if (usersForToday.length === 2) return; 
-                            // 如果当前用户没打过，就加入
-                            const currentUserId = window.currentUser.id;
-                            if (!usersForToday.includes(currentUserId)) {
-                                usersForToday.push(currentUserId);
-                                completedBy[todayStr] = usersForToday;
-                            }
-                        } else {
-                            // 个人打卡
-                            const todayDate = new Date().toDateString();
-                            const lastDate = data.last_date ? new Date(data.last_date).toDateString() : '';
-                            if (lastDate === todayDate) return;
-
-                            // 计算连续打卡
-                            const yesterday = new Date(Date.now() - 86400000).toDateString();
-                            const newStreak = (lastDate === yesterday) ? (data.streak || 0) + 1 : 1;
-                            const dateStr = todayStr;
-                            const newDates = data.dates || [];
-                            if (!newDates.includes(dateStr)) {
-                                newDates.push(dateStr);
-                            }
-
-                            await supabaseClient.from('checkins').update({
-                                last_date: new Date().toISOString(),
-                                streak: newStreak,
-                                dates: newDates
-                            }).eq('id', id);
-                            loadCheckins();
-                            return;
+                    if (type === '双人') {
+                        if (usersForToday.length === 2) return; 
+                        const currentUserId = window.currentUser.id;
+                        if (!usersForToday.includes(currentUserId)) {
+                            usersForToday.push(currentUserId);
+                            completedBy[todayStr] = usersForToday;
                         }
+                    } else {
+                        const todayDate = new Date().toDateString();
+                        const lastDate = data.last_date ? new Date(data.last_date).toDateString() : '';
+                        if (lastDate === todayDate) return;
 
-                        // 如果是双人，更新 JSONB
+                        const yesterday = new Date(Date.now() - 86400000).toDateString();
+                        const newStreak = (lastDate === yesterday) ? (data.streak || 0) + 1 : 1;
+                        const newDates = data.dates || [];
+                        if (!newDates.includes(todayStr)) {
+                            newDates.push(todayStr);
+                        }
                         await supabaseClient.from('checkins').update({
-                            completed_by: completedBy,
-                            dates: Object.keys(completedBy) // 同步更新 dates 字段供日历使用
+                            last_date: new Date().toISOString(),
+                            streak: newStreak,
+                            dates: newDates
                         }).eq('id', id);
-                        loadCheckins();
-                    };
-                });
+                        
+                        // 【关键修复】不刷新整个列表，保持当前 ID 不变
+                        loadCheckins(); 
+                        return;
+                    }
 
-                document.querySelectorAll('.check-item .btn').forEach(b => {
-                    b.onclick = async (e) => {
-                        e.stopPropagation();
-                        if (confirm('删除此打卡项目？')) {
-                            await supabaseClient.from('checkins').delete().eq('id', e.target.dataset.id);
-                            loadCheckins();
-                        }
-                    };
-                });
+                    // 双人打卡保存
+                    await supabaseClient.from('checkins').update({
+                        completed_by: completedBy,
+                        dates: Object.keys(completedBy) 
+                    }).eq('id', id);
+                    loadCheckins(); 
+                };
+
+                // 删除事件
+                div.querySelector('.btn').onclick = async (e) => {
+                    e.stopPropagation();
+                    if (confirm('删除此打卡项目？')) {
+                        await supabaseClient.from('checkins').delete().eq('id', e.target.dataset.id);
+                        loadCheckins();
+                    }
+                };
 
             } catch (err) {
                 listContainer.innerHTML = `<p style="text-align:center;color:var(--rose-dark);">⚠️ 加载失败，请检查 Supabase 配置</p>`;
@@ -2893,6 +3017,8 @@
                 if (!data || data.length === 0) {
                     container.innerHTML =
                         '<p style="text-align:center;color:var(--text-medium);padding:20px;">今天还没有任务，安排起来吧！💪</p>';
+                    // 【重要】即使没任务，也要记得渲染空的月度统计日历
+                    renderTaskCalendar(currentTaskDate.getFullYear(), currentTaskDate.getMonth());
                     return;
                 }
                 const groups = { '上午': [], '下午': [], '晚上': [], '其他': [] };
@@ -2946,11 +3072,69 @@
                         }
                     };
                 });
+
+                // 【关键】在 try 结束之前，追加这行代码，根据当前月/年渲染折叠日历
+                renderTaskCalendar(currentTaskDate.getFullYear(), currentTaskDate.getMonth());
+
             } catch (err) {
                 container.innerHTML = `<p style="text-align:center;color:var(--rose-dark);">⚠️ 加载失败</p>`;
             }
         }
+        async function renderTaskCalendar(year, month) {
+            const container = document.getElementById('taskCalendarContainer');
+            if (!container) return;
+            
+            const startDate = new Date(year, month, 1);
+            const endDate = new Date(year, month + 1, 0);
+            
+            // 获取当月所有任务
+            const { data } = await supabaseClient.from('tasks')
+                .select('date, status')
+                .gte('date', startDate.toISOString().split('T')[0])
+                .lte('date', endDate.toISOString().split('T')[0]);
 
+            const taskMap = {};
+            (data || []).forEach(t => {
+                if (!taskMap[t.date]) taskMap[t.date] = [];
+                taskMap[t.date].push(t.status);
+            });
+
+            // 计算当月每天完成情况
+            const stats = {};
+            for (let d = 1; d <= endDate.getDate(); d++) {
+                const key = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const tasks = taskMap[key] || [];
+                if (tasks.length > 0) {
+                    const completed = tasks.filter(s => s === 2).length;
+                    const total = tasks.length;
+                    stats[key] = `${completed}/${total}`;
+                }
+            }
+
+            // 构建日历 UI (极简浪漫风)
+            const daysInMonth = endDate.getDate();
+            const firstDay = startDate.getDay();
+            let html = `<div style="display:grid; grid-template-columns: repeat(7,1fr); gap:6px; background:white; padding:12px; border-radius:16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">`;
+            ['日','一','二','三','四','五','六'].forEach(d => html += `<div style="text-align:center;color:#aaa;font-size:0.7rem;">${d}</div>`);
+            for(let i=0; i<firstDay; i++) html += `<div></div>`;
+            for (let d=1; d<=daysInMonth; d++) {
+                const key = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const val = stats[key];
+                const isToday = key === new Date().toISOString().split('T')[0];
+                let bg = '#fff';
+                let text = `<span style="font-size:0.8rem;">${d}</span>`;
+                if (val) {
+                    if (val === '0/0') bg = '#f8f8f8';
+                    else if (val.split('/')[0] === val.split('/')[1]) { bg = '#fce8e6'; text = `<span style="color:#e8878a;font-size:1.1rem;">✅</span>`; }
+                    else { bg = '#fff0ee'; text = `<span style="color:#d47073;font-size:0.7rem;font-weight:bold;">${val}</span>`; }
+                }
+                if (isToday) bg += '; border: 2px solid #e8878a;';
+                html += `<div style="text-align:center; padding:8px 0; border-radius:8px; background:${bg};">${text}</div>`;
+            }
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
         // ============================================================
         //  💌 留言（支持回复和点赞）
         // ============================================================
