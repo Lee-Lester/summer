@@ -2912,7 +2912,7 @@
                         }).eq('id', id);
                         
                         // 单人打卡
-                        console.log("🎯 打卡成功，马上就要放流星了！");
+                        
                         triggerRomanticEffect('shootingStar');
                         setTimeout(() => { loadCheckins(); }, 300);
                         return;
@@ -2931,7 +2931,7 @@
                         setTimeout(() => { triggerRomanticEffect('shootingStar'); }, 400);
                     } else {
                         // 第一个人完成
-                        console.log("🎯 打卡成功，马上就要放流星了！");
+                        
                         triggerRomanticEffect('shootingStar');
                     }
 
@@ -3819,16 +3819,21 @@
         }
 
         // ============================================================
-        //  🎀 触发挂载点（增强防卡死版）
+        //  🎀 触发挂载点（终极防刷版）
         // ============================================================
         function triggerRomanticEffect(type) {
-            // 强制清理上一轮残余动画，彻底消除卡死锁！
+            // 1. 强制清空上一轮残局（防止特效卡死）
             if (effectRunning) {
                 const overlay = document.getElementById('effect-overlay');
                 if (overlay) overlay.style.display = 'none';
                 effectRunning = false;
             }
-            showEffect(type);
+
+            // 2. 核心改动：使用 queueMicrotask 强制特效插队渲染！
+            // 这会让特效引擎绕过浏览器的“DOM 批量合并”机制，永远是第一个跑出来的！
+            queueMicrotask(() => {
+                showEffect(type);
+            });
         }
         
         // 【新增这一行】必须调用应用初始化函数，才能弹出登录框！
