@@ -2900,6 +2900,10 @@
                         completed_by: completedBy,
                         dates: Object.keys(completedBy) 
                     }).eq('id', id);
+                    
+                    // 【新增】双人打卡成功也必须触发流星雨
+                    triggerRomanticEffect('shootingStar');
+                    
                     loadCheckins(); 
                 };
 
