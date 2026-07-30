@@ -2729,12 +2729,15 @@
             container.innerHTML = html;
         }
 
-        // 【新增】日历打卡触发函数
+        // 【新增】日历打卡触发函数（已加入流星雨特效）
         async function clickDateToCheckin(taskId, targetDateStr, type) {
             if (!taskId) return;
             const { data } = await supabaseClient.from('checkins').select('*').eq('id', taskId).single();
             let completedBy = data.completed_by || {};
             let usersForToday = completedBy[targetDateStr] || [];
+
+            // 添加一个临时标记，判断是否为第二个人打完卡
+            let isSecondPerson = false;
 
             if (type === '双人') {
                 if (usersForToday.length >= 2) return; 
@@ -2742,15 +2745,15 @@
                 if (!usersForToday.includes(currentUserId)) {
                     usersForToday.push(currentUserId);
                     completedBy[targetDateStr] = usersForToday;
+                    // 更新后检查长度
+                    if (usersForToday.length === 2) isSecondPerson = true;
                 }
             } else {
-                // 单人打卡
                 const dateStr = targetDateStr;
                 const newDates = data.dates || [];
                 if (!newDates.includes(dateStr)) {
                     newDates.push(dateStr);
                 }
-                // 如果补的是今天的卡，顺便更新连续天数
                 const todayStr = new Date().toISOString().split('T')[0];
                 let updateObj = { dates: newDates };
                 if (dateStr === todayStr) {
@@ -2762,15 +2765,31 @@
                     updateObj.last_date = new Date().toISOString();
                 }
                 await supabaseClient.from('checkins').update(updateObj).eq('id', taskId);
-                loadCheckins();
+                
+                // 🌟 给日历打卡加流星雨
+                triggerRomanticEffect('shootingStar');
+                
+                setTimeout(() => { loadCheckins(); }, 300);
                 return;
             }
+
             // 双人保存
             await supabaseClient.from('checkins').update({
                 completed_by: completedBy,
                 dates: Object.keys(completedBy) 
             }).eq('id', taskId);
-            loadCheckins();
+
+            // 🌟 双人打卡逻辑
+            if (isSecondPerson) {
+                // 第二个人打卡：烟花 + 流星雨双重浪漫！
+                triggerRomanticEffect('celebrate');
+                setTimeout(() => { triggerRomanticEffect('shootingStar'); }, 400);
+            } else {
+                // 第一个人打卡：流星雨
+                triggerRomanticEffect('shootingStar');
+            }
+
+            setTimeout(() => { loadCheckins(); }, 300);
         }
 
         async function loadCheckins() {
@@ -2864,6 +2883,7 @@
                     const todayStr = new Date().toISOString().split('T')[0];
                     let completedBy = data.completed_by || {};
                     let usersForToday = completedBy[todayStr] || [];
+                    let isSecondPerson = false; // 新增标记
 
                     if (type === '双人') {
                         if (usersForToday.length === 2) return; 
@@ -2871,6 +2891,8 @@
                         if (!usersForToday.includes(currentUserId)) {
                             usersForToday.push(currentUserId);
                             completedBy[todayStr] = usersForToday;
+                            // 如果更新后长度变成了2，说明是第二个人打成功了
+                            if (usersForToday.length === 2) isSecondPerson = true;
                         }
                     } else {
                         const todayDate = new Date().toDateString();
@@ -2889,11 +2911,9 @@
                             dates: newDates
                         }).eq('id', id);
                         
-                        // 【修改】触发流星雨，然后延迟 300ms 刷新列表，彻底避开渲染冲突！
+                        // 单人打卡
                         triggerRomanticEffect('shootingStar');
-                        setTimeout(() => {
-                            loadCheckins(); 
-                        }, 300);
+                        setTimeout(() => { loadCheckins(); }, 300);
                         return;
                     }
 
@@ -2903,25 +2923,18 @@
                         dates: Object.keys(completedBy) 
                     }).eq('id', id);
                     
-                    // 【极致浪漫】检测是不是第二个人完成的！
-                    const isSecondPerson = usersForToday.length === 1; 
-                    
+                    // 【完美逻辑】判断该由谁触发什么特效
                     if (isSecondPerson) {
-                        // 如果是第二个人完成，触发超级浪漫组合拳！
-                        triggerRomanticEffect('celebrate'); // 先放同心烟花！
-                        // 300毫秒后，再放一场流星雨，层层叠加！
-                        setTimeout(() => {
-                            triggerRomanticEffect('shootingStar');
-                        }, 300);
+                        // 第二个人完成，极尽浪漫！
+                        triggerRomanticEffect('celebrate');
+                        setTimeout(() => { triggerRomanticEffect('shootingStar'); }, 400);
                     } else {
-                        // 如果是第一个人打卡，正常放流星雨
+                        // 第一个人完成
                         triggerRomanticEffect('shootingStar');
                     }
 
-                    // 【修改】延迟 300ms 刷新列表，完美避开特效执行的黄金时间
-                    setTimeout(() => {
-                        loadCheckins(); 
-                    }, 300);
+                    // 延迟刷新让位给特效
+                    setTimeout(() => { loadCheckins(); }, 300);
                 };
 
                 // 删除事件
