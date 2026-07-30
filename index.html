@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🔐 小亮 ❤️ 瑶瑶 · 秘密花园</title>
+    <title>小亮 ❤️ 瑶瑶 · 拾光馆</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
     </script>
     <style>
@@ -31,7 +31,6 @@
             color: var(--text-dark);
             overflow-x: hidden;
         }
-        /* ===== 画布（花瓣&爱心粒子） ===== */
         #particleCanvas {
             position: fixed;
             top: 0;
@@ -75,12 +74,8 @@
             animation: loginFloat 2s ease-in-out infinite alternate;
         }
         @keyframes loginFloat {
-            0% {
-                transform: translateY(0);
-            }
-            100% {
-                transform: translateY(-10px);
-            }
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-10px); }
         }
         .login-card .icon {
             font-size: 56px;
@@ -203,18 +198,10 @@
             padding: 20px;
             transition: 0.4s;
         }
-        .front {
-            display: flex;
-        }
-        .back {
-            display: none;
-        }
-        .front.hidden {
-            display: none;
-        }
-        .back.visible {
-            display: flex;
-        }
+        .front { display: flex; }
+        .back { display: none; }
+        .front.hidden { display: none; }
+        .back.visible { display: flex; }
 
         /* ===== 首页 ===== */
         .hero-icon {
@@ -222,19 +209,10 @@
             animation: bounce 2s infinite;
         }
         @keyframes bounce {
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-            15% {
-                transform: translateY(-18px);
-            }
-            30% {
-                transform: translateY(0);
-            }
-            45% {
-                transform: translateY(-8px);
-            }
+            0%,100% { transform: translateY(0); }
+            15% { transform: translateY(-18px); }
+            30% { transform: translateY(0); }
+            45% { transform: translateY(-8px); }
         }
         .hero-title {
             font-size: 2.5rem;
@@ -247,7 +225,6 @@
         .timer-box {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border-radius: var(--radius);
             padding: 20px 30px;
             margin: 20px auto;
@@ -289,18 +266,10 @@
             transform: rotate(var(--r, 0));
             cursor: default;
         }
-        .polaroid:nth-child(1) {
-            --r: -2deg;
-        }
-        .polaroid:nth-child(2) {
-            --r: 2deg;
-        }
-        .polaroid:nth-child(3) {
-            --r: 2.5deg;
-        }
-        .polaroid:nth-child(4) {
-            --r: -1.5deg;
-        }
+        .polaroid:nth-child(1) { --r: -2deg; }
+        .polaroid:nth-child(2) { --r: 2deg; }
+        .polaroid:nth-child(3) { --r: 2.5deg; }
+        .polaroid:nth-child(4) { --r: -1.5deg; }
         .polaroid:hover {
             transform: rotate(0) translateY(-8px);
             box-shadow: var(--shadow-hover);
@@ -340,7 +309,6 @@
         .garden-header {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             border-radius: 40px;
             padding: 12px 20px;
             display: flex;
@@ -404,24 +372,15 @@
             display: none;
             animation: fadeUp 0.3s ease;
         }
-        .panel.active {
-            display: block;
-        }
+        .panel.active { display: block; }
         @keyframes fadeUp {
-            0% {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            0% { opacity: 0; transform: translateY(12px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
         .card {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             border-radius: var(--radius);
             padding: 20px;
             margin-bottom: 20px;
@@ -464,6 +423,50 @@
             font-size: 0.8rem;
         }
 
+        /* ===== 语音录制样式 ===== */
+        .voice-recorder {
+            margin: 12px 0;
+            padding: 12px;
+            background: rgba(232, 135, 138, 0.08);
+            border-radius: 16px;
+            border: 1px dashed rgba(200, 160, 165, 0.3);
+        }
+        .voice-recorder .recorder-status {
+            font-size: 0.8rem;
+            color: var(--text-medium);
+        }
+        .voice-recorder .recorder-timer {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--rose-dark);
+            display: none;
+        }
+        .voice-recorder .recorder-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .voice-recorder .recorder-buttons button {
+            font-size: 0.9rem;
+        }
+        .voice-recorder .recorder-audio-container {
+            margin-top: 8px;
+            display: none;
+        }
+        .voice-recorder .recorder-audio-container audio {
+            width: 100%;
+            max-width: 300px;
+            height: 40px;
+        }
+        .voice-recorder .recorder-transcript {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            display: none;
+        }
+
+        /* ===== 其他通用样式 ===== */
         .mood-selector {
             display: flex;
             gap: 12px;
@@ -564,7 +567,6 @@
             background: rgba(200, 70, 70, 0.8);
             transform: scale(1.1);
         }
-
         .check-item,
         .wish-item,
         .task-item {
@@ -583,7 +585,6 @@
         .wish-star {
             font-size: 1.8rem;
             cursor: pointer;
-            transition: 0.2s;
             user-select: none;
             min-width: 40px;
             text-align: center;
@@ -592,7 +593,6 @@
         .wish-star:hover {
             transform: scale(1.15);
         }
-
         .task-status {
             font-size: 1.8rem;
             cursor: pointer;
@@ -611,7 +611,6 @@
         .task-item .btn {
             flex-shrink: 0;
         }
-
         .task-period-group {
             margin-bottom: 16px;
         }
@@ -623,7 +622,6 @@
             border-left: 3px solid var(--rose);
             padding-left: 8px;
         }
-
         .task-date-nav {
             display: flex;
             align-items: center;
@@ -638,7 +636,6 @@
             cursor: pointer;
             padding: 4px 8px;
             border-radius: 8px;
-            transition: 0.2s;
         }
         .task-date-nav button:hover {
             background: rgba(200, 160, 165, 0.2);
@@ -649,7 +646,6 @@
             min-width: 120px;
             text-align: center;
         }
-
         .task-add-area {
             display: flex;
             gap: 10px;
@@ -675,7 +671,6 @@
             margin-bottom: 10px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             border-left: 4px solid var(--rose-light);
-            transition: 0.2s;
         }
         .msg-bubble .msg-header {
             display: flex;
@@ -704,7 +699,6 @@
             font-size: 0.8rem;
             padding: 2px 6px;
             border-radius: 12px;
-            transition: 0.2s;
         }
         .msg-bubble .msg-actions button:hover {
             background: rgba(232, 135, 138, 0.1);
@@ -807,7 +801,7 @@
             text-overflow: ellipsis;
         }
 
-        /* 幻灯片模态框 */
+        /* ===== 幻灯片模态框 ===== */
         .slideshow-modal {
             display: none;
             position: fixed;
@@ -821,9 +815,7 @@
             align-items: center;
             flex-direction: column;
         }
-        .slideshow-modal.active {
-            display: flex;
-        }
+        .slideshow-modal.active { display: flex; }
         .slideshow-modal img {
             max-width: 90%;
             max-height: 80vh;
@@ -850,7 +842,6 @@
             padding: 10px 18px;
             border-radius: 50%;
             cursor: pointer;
-            transition: 0.2s;
             backdrop-filter: blur(4px);
         }
         .slideshow-modal .controls button:hover {
@@ -885,7 +876,6 @@
             transform: scale(1.2);
         }
 
-        /* 月份选择 */
         .month-selector {
             display: flex;
             gap: 12px;
@@ -901,121 +891,7 @@
             font-size: 0.9rem;
         }
 
-        /* 日记评论 */
-        .diary-comments {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(200, 160, 165, 0.2);
-        }
-        .diary-comments .toggle-comments {
-            cursor: pointer;
-            color: var(--text-medium);
-            font-size: 0.85rem;
-            background: none;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 12px;
-            transition: 0.2s;
-        }
-        .diary-comments .toggle-comments:hover {
-            background: rgba(200, 160, 165, 0.1);
-        }
-        .diary-comments .comment-area {
-            display: none;
-            margin-top: 8px;
-        }
-        .diary-comments .comment-area .comment-input-row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 8px;
-        }
-        .diary-comments .comment-area .comment-input-row input {
-            flex: 1;
-            min-width: 120px;
-            padding: 6px 12px;
-            border-radius: 20px;
-            border: 1px solid #f0d3d5;
-            font-size: 0.85rem;
-        }
-        .diary-comments .comment-area .comment-input-row button {
-            padding: 6px 16px;
-            border-radius: 20px;
-            border: none;
-            background: var(--rose);
-            color: white;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        .diary-comments .comment-item {
-            margin-bottom: 8px;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 12px;
-            border-left: 3px solid var(--rose-light);
-        }
-        .diary-comments .comment-item .comment-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            font-size: 0.85rem;
-        }
-        .diary-comments .comment-item .comment-header strong {
-            color: var(--rose-dark);
-        }
-        .diary-comments .comment-item .comment-header small {
-            color: var(--text-medium);
-        }
-        .diary-comments .comment-item .comment-text {
-            margin: 4px 0;
-        }
-        .diary-comments .comment-item .comment-actions {
-            display: flex;
-            gap: 12px;
-            font-size: 0.8rem;
-            margin-top: 4px;
-        }
-        .diary-comments .comment-item .comment-actions button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-medium);
-            padding: 0;
-        }
-        .diary-comments .comment-item .comment-actions .like-btn.liked {
-            color: var(--rose);
-        }
-        .diary-comments .comment-item .reply-box {
-            display: none;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 6px;
-        }
-        .diary-comments .comment-item .reply-box input {
-            flex: 1;
-            min-width: 100px;
-            padding: 4px 10px;
-            border-radius: 16px;
-            border: 1px solid #f0d3d5;
-            font-size: 0.8rem;
-        }
-        .diary-comments .comment-item .reply-box button {
-            padding: 4px 12px;
-            border-radius: 16px;
-            border: none;
-            background: var(--rose);
-            color: white;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        .diary-comments .comment-item .replies {
-            margin-top: 6px;
-            padding-left: 16px;
-            border-left: 2px solid #e0c4c6;
-        }
-
-        /* ===== 音乐播放器样式 ===== */
+        /* ===== 音乐播放器 ===== */
         .music-player {
             position: fixed;
             bottom: 30px;
@@ -1054,9 +930,8 @@
             border-radius: 16px;
             padding: 16px;
             margin-bottom: 8px;
-            width: 260px;
+            width: 280px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-            transition: 0.3s;
         }
         .music-panel .music-info {
             text-align: center;
@@ -1074,8 +949,9 @@
         .music-controls {
             display: flex;
             justify-content: center;
+            align-items: center;
             gap: 16px;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
         .music-controls button {
             background: none;
@@ -1090,11 +966,121 @@
             color: var(--rose);
             transform: scale(1.1);
         }
+        .music-toggle-extras {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--text-medium);
+            padding: 0 4px;
+            transition: 0.2s;
+            margin-left: auto;
+        }
+        .music-toggle-extras:hover {
+            color: var(--rose);
+            transform: rotate(30deg);
+        }
+        .music-controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .music-extras {
+            margin-top: 8px;
+            border-top: 1px solid rgba(200, 160, 165, 0.2);
+            padding-top: 10px;
+        }
+        .music-extras .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .music-extras .progress-container input[type="range"] {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e0d3d4;
+            border-radius: 4px;
+            outline: none;
+        }
+        .music-extras .progress-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--rose);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 4px rgba(0,0,0,0.2);
+        }
+        .music-extras .time-display {
+            font-size: 0.75rem;
+            color: var(--text-medium);
+            min-width: 70px;
+            text-align: center;
+        }
+        .music-extras .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .music-extras .volume-row input[type="range"] {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e0d3d4;
+            border-radius: 4px;
+            outline: none;
+        }
+        .music-extras .volume-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--rose);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 4px rgba(0,0,0,0.2);
+        }
+        .music-extras .volume-row .vol-icon {
+            font-size: 1rem;
+            color: var(--text-medium);
+            min-width: 24px;
+        }
+        .music-extras .mode-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 6px;
+            font-size: 0.85rem;
+            color: var(--text-medium);
+        }
+        .music-extras .mode-row .mode-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+        .music-extras .mode-row .mode-btn:hover {
+            background: rgba(232,135,138,0.15);
+        }
+        .music-extras .mode-row .mode-label {
+            font-size: 0.8rem;
+            color: var(--text-medium);
+        }
         .music-playlist {
             max-height: 150px;
             overflow-y: auto;
             border-top: 1px solid rgba(200, 160, 165, 0.2);
             padding-top: 8px;
+            margin-top: 8px;
         }
         .music-playlist ul {
             list-style: none;
@@ -1120,151 +1106,61 @@
             font-weight: 600;
         }
 
-        /* ===== 响应式 ===== */
+        /* 响应式 */
         @media (max-width: 700px) {
-            .timer-box {
-                gap: 10px;
-                padding: 16px 20px;
-            }
-            .timer-block {
-                min-width: 40px;
-            }
-            .timer-num {
-                font-size: 1.6rem;
-            }
-            .photos {
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-            }
-            .hero-title {
-                font-size: 1.8rem;
-            }
-            .garden-header {
-                flex-direction: column;
-                align-items: stretch;
-                padding: 16px;
-            }
-            .garden-header .brand {
-                justify-content: center;
-            }
-            .tabs {
-                justify-content: center;
-            }
-            .tab {
-                padding: 6px 12px;
-                font-size: 0.8rem;
-            }
-            .login-card {
-                padding: 32px 24px 28px;
-            }
-            .login-card h1 {
-                font-size: 1.6rem;
-            }
-            .gallery-item {
-                width: 100px;
-            }
-            .gallery-item .thumb {
-                height: 64px;
-            }
-            .back-btn {
-                align-self: center;
-            }
-            .music-panel {
-                width: 220px;
-            }
-            .slideshow-modal img {
-                max-width: 95%;
-                max-height: 70vh;
-            }
-            .task-add-area {
-                flex-direction: column;
-            }
+            .timer-box { gap: 10px; padding: 16px 20px; }
+            .timer-block { min-width: 40px; }
+            .timer-num { font-size: 1.6rem; }
+            .photos { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .hero-title { font-size: 1.8rem; }
+            .garden-header { flex-direction: column; align-items: stretch; padding: 16px; }
+            .garden-header .brand { justify-content: center; }
+            .tabs { justify-content: center; }
+            .tab { padding: 6px 12px; font-size: 0.8rem; }
+            .login-card { padding: 32px 24px 28px; }
+            .login-card h1 { font-size: 1.6rem; }
+            .gallery-item { width: 100px; }
+            .gallery-item .thumb { height: 64px; }
+            .back-btn { align-self: center; }
+            .music-panel { width: 220px; }
+            .slideshow-modal img { max-width: 95%; max-height: 70vh; }
+            .task-add-area { flex-direction: column; }
             .task-add-area input,
-            .task-add-area select {
-                width: 100%;
-            }
+            .task-add-area select { width: 100%; }
         }
         @media (max-width: 440px) {
-            .photos {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-            .polaroid {
-                padding: 6px 6px 18px;
-            }
-            .polaroid p {
-                font-size: 0.7rem;
-            }
-            .timer-box {
-                padding: 12px 14px;
-                gap: 6px;
-            }
-            .timer-block {
-                min-width: 32px;
-            }
-            .timer-num {
-                font-size: 1.3rem;
-            }
-            .timer-label {
-                font-size: 0.65rem;
-            }
-            .hero-title {
-                font-size: 1.5rem;
-            }
-            .enter-btn {
-                padding: 12px 28px;
-                font-size: 1rem;
-            }
-            .garden-header .brand {
-                font-size: 1.1rem;
-            }
-            .tab {
-                font-size: 0.7rem;
-                padding: 4px 10px;
-            }
-            .card {
-                padding: 14px;
-            }
-            .music-panel {
-                width: 180px;
-            }
+            .photos { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .polaroid { padding: 6px 6px 18px; }
+            .polaroid p { font-size: 0.7rem; }
+            .timer-box { padding: 12px 14px; gap: 6px; }
+            .timer-block { min-width: 32px; }
+            .timer-num { font-size: 1.3rem; }
+            .timer-label { font-size: 0.65rem; }
+            .hero-title { font-size: 1.5rem; }
+            .enter-btn { padding: 12px 28px; font-size: 1rem; }
+            .garden-header .brand { font-size: 1.1rem; }
+            .tab { font-size: 0.7rem; padding: 4px 10px; }
+            .card { padding: 14px; }
+            .music-panel { width: 180px; }
         }
 
-        /* ===== 爱心飘浮动画（点击） ===== */
+        /* 爱心飘浮动画 */
         @keyframes floatUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1) rotate(0deg);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-180px) scale(1.6) rotate(30deg);
-            }
+            0% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(-180px) scale(1.6) rotate(30deg); }
         }
 
-        /* ===== 滚动条美化 ===== */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(200, 160, 165, 0.08);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--rose-light);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--rose);
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(200, 160, 165, 0.08); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--rose-light); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--rose); }
     </style>
 </head>
 <body>
-
-    <!-- ===== 粒子画布 ===== -->
+    <!-- 粒子画布 -->
     <canvas id="particleCanvas"></canvas>
 
-    <!-- ===== 音乐播放器（歌单） ===== -->
+    <!-- ===== 音乐播放器 ===== -->
     <div id="musicPlayer" class="music-player">
         <button class="music-toggle" id="musicToggle" title="播放/暂停">🎵</button>
         <div class="music-panel" id="musicPanel" style="display:none;">
@@ -1272,10 +1168,28 @@
                 <span id="currentSongName">未播放</span>
                 <span id="currentArtist"></span>
             </div>
-            <div class="music-controls">
-                <button id="prevBtn">⏮</button>
-                <button id="playBtn">▶</button>
-                <button id="nextBtn">⏭</button>
+            <div class="music-controls-row">
+                <div class="music-controls">
+                    <button id="prevBtn">⏮</button>
+                    <button id="playBtn">▶</button>
+                    <button id="nextBtn">⏭</button>
+                </div>
+                <button class="music-toggle-extras" id="toggleExtras" title="展开/收起高级控件">⚙️</button>
+            </div>
+            <div class="music-extras" id="musicExtras" style="display:none;">
+                <div class="progress-container">
+                    <input type="range" id="progressBar" min="0" max="1" step="0.001" value="0" />
+                    <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+                </div>
+                <div class="volume-row">
+                    <span class="vol-icon" id="volIcon">🔊</span>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.6" />
+                </div>
+                <div class="mode-row">
+                    <span>播放模式：</span>
+                    <button class="mode-btn" id="modeBtn">🔁</button>
+                    <span class="mode-label" id="modeLabel">顺序播放</span>
+                </div>
             </div>
             <div class="music-playlist">
                 <ul id="playlist"></ul>
@@ -1287,12 +1201,12 @@
     <div id="loginPage">
         <div class="login-card">
             <span class="icon">🔐</span>
-            <h1>秘密花园</h1>
-            <p class="sub">只属于小亮 ❤️ 瑶瑶的世界</p>
+            <h1>拾光馆</h1>
+            <p class="sub">小亮 ❤️ 瑶瑶 · 专属空间</p>
             <div class="hint">💌 请输入 <span>我们的纪念日</span></div>
             <div class="input-group">
                 <input type="password" id="passwordInput" placeholder="· · · ·" maxlength="10" autocomplete="off" />
-                <button class="login-btn" id="loginBtn">🌸 开启花园</button>
+                <button class="login-btn" id="loginBtn">🌸 开启拾光</button>
                 <div class="error-msg" id="loginError">💔 密码不对哦，再想想～</div>
             </div>
             <p class="footer-text">🌹 2026 · 7 · 1  ·   forever</p>
@@ -1326,16 +1240,15 @@
                     <p id="heartCountDisplay" style="color:var(--text-medium);">收到了 0 颗爱心</p>
                 </div>
                 <div style="text-align:center;">
-                    <button class="enter-btn" id="enterGarden">🌸 进入我们的秘密花园</button>
+                    <button class="enter-btn" id="enterGarden">🌸 进入拾光馆</button>
                 </div>
             </div>
         </div>
-
-        <!-- ===== 秘密花园 ===== -->
+                <!-- ===== 秘密花园（主面板） ===== -->
         <div id="gardenScene" class="scene back">
             <div style="max-width:1000px; width:100%;">
                 <div class="garden-header">
-                    <span class="brand">🌸 秘密花园</span>
+                    <span class="brand">📖 拾光馆</span>
                     <div class="tabs" id="mainTabs">
                         <button class="tab active" data-tab="diary">📝 日记</button>
                         <button class="tab" data-tab="checkin">☑️ 打卡</button>
@@ -1347,7 +1260,7 @@
                     <button class="back-btn" id="backToFront">🏠 返回</button>
                 </div>
 
-                <!-- 日记 -->
+                <!-- ===== 日记面板 ===== -->
                 <div id="panel-diary" class="panel active">
                     <div class="card">
                         <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px; flex-wrap:wrap;">
@@ -1361,6 +1274,30 @@
                             </div>
                         </div>
                         <textarea id="diaryContent" rows="4" placeholder="今天发生了什么甜蜜的事…"></textarea>
+                        
+                        <!-- ===== 语音日记录制区域 ===== -->
+                        <div class="voice-recorder">
+                            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                                <span style="font-weight:600; font-size:0.95rem;">🎙️ 语音日记</span>
+                                <span class="recorder-status" id="recordingStatus">点击下方按钮开始录音</span>
+                                <span class="recorder-timer" id="recordingTimer">⏱️ 00:00</span>
+                            </div>
+                            <div class="recorder-buttons">
+                                <button class="btn primary" id="startRecordBtn">🎤 开始录音</button>
+                                <button class="btn" style="background:#f0d3d5; color:var(--text-medium); display:none;" id="stopRecordBtn">⏹ 停止录音</button>
+                                <button class="btn btn-outline" style="display:none;" id="playRecordBtn">▶ 试听</button>
+                                <button class="btn" style="background:#f0d3d5; color:var(--text-medium); display:none;" id="deleteRecordBtn">🗑️ 删除</button>
+                            </div>
+                            <div class="recorder-audio-container" id="recordedAudioContainer">
+                                <audio id="recordedAudio" controls></audio>
+                                <span id="recordedDuration" style="font-size:0.8rem; color:var(--text-medium); margin-left:8px;"></span>
+                            </div>
+                            <div class="recorder-transcript" id="transcriptContainer">
+                                <span style="font-size:0.75rem; color:var(--text-medium);">📝 识别文字：</span>
+                                <span id="transcriptText" style="font-size:0.85rem; color:var(--text-dark);"></span>
+                            </div>
+                        </div>
+
                         <div class="file-upload" id="fileUploadTrigger">📎 点击上传照片 / 视频 / 音频 / 文档</div>
                         <input type="file" id="fileInput" multiple accept="*" style="display:none;" />
                         <div class="preview" id="filePreview"></div>
@@ -1379,18 +1316,17 @@
                     <div id="diaryList"></div>
                 </div>
 
-                <!-- 打卡 -->
+                <!-- ===== 打卡面板 ===== -->
                 <div id="panel-checkin" class="panel">
                     <div class="card" style="display:flex; gap:10px; flex-wrap:wrap;">
                         <input type="text" id="newCheckItem" placeholder="新建打卡项目，例如：早安吻 💋" style="flex:1; min-width:160px;" />
                         <button class="btn primary" id="addCheckBtn">➕ 添加</button>
                     </div>
-                    <!-- 打卡日历容器 -->
                     <div id="checkinCalendarContainer" style="margin-bottom:16px;"></div>
                     <div id="checkinList"></div>
                 </div>
 
-                <!-- 心愿 -->
+                <!-- ===== 心愿面板 ===== -->
                 <div id="panel-wishes" class="panel">
                     <div class="card" style="display:flex; gap:10px; flex-wrap:wrap;">
                         <input type="text" id="newWish" placeholder="写下想一起做的事…" style="flex:1; min-width:160px;" />
@@ -1399,7 +1335,7 @@
                     <div id="wishList"></div>
                 </div>
 
-                <!-- 任务面板 -->
+                <!-- ===== 任务面板 ===== -->
                 <div id="panel-tasks" class="panel">
                     <div class="card">
                         <div class="task-date-nav">
@@ -1422,7 +1358,7 @@
                     </div>
                 </div>
 
-                <!-- 留言 -->
+                <!-- ===== 留言面板 ===== -->
                 <div id="panel-messages" class="panel">
                     <div class="card" style="display:flex; gap:10px; flex-wrap:wrap;">
                         <input type="text" id="newMsg" placeholder="给 Ta 写句话…" style="flex:1; min-width:160px;" />
@@ -1431,7 +1367,7 @@
                     <div id="msgList"></div>
                 </div>
 
-                <!-- 回忆盒 -->
+                <!-- ===== 回忆盒面板 ===== -->
                 <div id="panel-gallery" class="panel">
                     <div class="filter-group">
                         <button class="filter-btn active" data-type="all">全部</button>
@@ -1460,23 +1396,16 @@
 
     <script>
         // ============================================================
-        //  🔐 配 置 区  ——  请 按 照 说 明 修 改
+        //  🔐 配 置 区 （请修改为你的 Supabase 信息）
         // ============================================================
-
-        // 1. 登录密码（默认：相识日 0701）
-        const SECRET_PASSWORD = '0701';
-
-        // 2. Supabase 配置（必填！）
-        const SUPABASE_URL = 'https://ldqauibuqwpwwtjoihjk.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcWF1aWJ1cXdwd3d0am9paGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMjA5MjMsImV4cCI6MjEwMDc5NjkyM30.PxxJn1IKE4ck3WszrmPGr5gcL_j7wcmPjawHMbhlhcU';
-
-        // 3. 相识日期（用于计时器）
+        const SECRET_PASSWORD = '520471';  // 密码已改为 520471
+        const SUPABASE_URL = 'https://ldqauibuqwpwwtjoihjk.supabase.co';     // 替换为你的 Supabase URL
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcWF1aWJ1cXdwd3d0am9paGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMjA5MjMsImV4cCI6MjEwMDc5NjkyM30.PxxJn1IKE4ck3WszrmPGr5gcL_j7wcmPjawHMbhlhcU';                        // 替换为你的 anon key
         const LOVE_START = new Date('2026-07-01T00:00:00');
-
-        // 4. Supabase Storage 桶名称（请确保已创建并公开）
         const STORAGE_BUCKET = 'diary-files';
+        const VOICE_BUCKET = 'voice-diary';   // 语音专用桶
 
-        // 5. 歌单（使用你的 Supabase Storage 音乐链接）
+        // 歌单（请替换为你的音乐链接）
         const songList = [{
             name: '我想你',
             artist: '汪苏泷',
@@ -1496,40 +1425,33 @@
         }];
 
         // ============================================================
-        //  🚀 以 下 代 码 无 需 修 改
+        //  🚀 Supabase 客户端
         // ============================================================
-
-        // ---- Supabase 客户端 ----
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // ---- DOM 引用 ----
+        // ============================================================
+        //  DOM 引用与登录逻辑
+        // ============================================================
         const loginPage = document.getElementById('loginPage');
         const app = document.getElementById('app');
         const passwordInput = document.getElementById('passwordInput');
         const loginBtn = document.getElementById('loginBtn');
         const loginError = document.getElementById('loginError');
 
-        // ---- 登录逻辑 ----
         function checkAuth() {
-            const saved = localStorage.getItem('secret_garden_auth');
+            const saved = localStorage.getItem('shiguang_auth');
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
-                    if (data.expiry && Date.now() < data.expiry) {
-                        return true;
-                    }
-                } catch (_) { /* ignore */ }
+                    if (data.expiry && Date.now() < data.expiry) return true;
+                } catch (_) {}
             }
             return false;
         }
 
         function setAuth() {
-            const expiry = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 天
-            localStorage.setItem('secret_garden_auth', JSON.stringify({ expiry }));
-        }
-
-        function clearAuth() {
-            localStorage.removeItem('secret_garden_auth');
+            const expiry = Date.now() + 7 * 24 * 60 * 60 * 1000;
+            localStorage.setItem('shiguang_auth', JSON.stringify({ expiry }));
         }
 
         function doLogin() {
@@ -1551,12 +1473,9 @@
             }
         }
 
-        passwordInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') doLogin();
-        });
+        passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
         loginBtn.addEventListener('click', doLogin);
 
-        // ---- 自动登录检测 ----
         if (checkAuth()) {
             loginPage.classList.add('hidden');
             app.classList.add('visible');
@@ -1569,9 +1488,14 @@
             setTimeout(() => passwordInput.focus(), 400);
         }
 
-        // ---- 音乐播放器（歌单） ----
+        // ============================================================
+        //  🎵 音乐播放器增强逻辑
+        // ============================================================
         let currentSongIndex = 0;
         let isPlaying = false;
+        let playMode = 0; // 0:顺序, 1:单曲循环, 2:随机
+        const modeIcons = ['🔁', '🔂', '🔀'];
+        const modeLabels = ['顺序播放', '单曲循环', '随机播放'];
         const audio = new Audio();
         audio.volume = 0.6;
 
@@ -1583,6 +1507,15 @@
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
         const playlistEl = document.getElementById('playlist');
+        const toggleExtras = document.getElementById('toggleExtras');
+        const musicExtras = document.getElementById('musicExtras');
+        const progressBar = document.getElementById('progressBar');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volIcon = document.getElementById('volIcon');
+        const modeBtn = document.getElementById('modeBtn');
+        const modeLabel = document.getElementById('modeLabel');
+        let isDraggingProgress = false;
 
         function renderPlaylist() {
             playlistEl.innerHTML = '';
@@ -1608,16 +1541,6 @@
             renderPlaylist();
         }
 
-        function updateUI() {
-            const song = songList[currentSongIndex];
-            currentSongName.textContent = song.name;
-            currentArtist.textContent = song.artist;
-            playBtn.textContent = isPlaying ? '⏸' : '▶';
-            musicToggle.textContent = isPlaying ? '🎶' : '🎵';
-            musicToggle.classList.toggle('playing', isPlaying);
-            renderPlaylist();
-        }
-
         function togglePlay() {
             if (audio.paused) {
                 audio.play().catch(() => {});
@@ -1630,28 +1553,108 @@
         }
 
         function prevSong() {
+            if (playMode === 2) { playRandomSong(); return; }
             let idx = currentSongIndex - 1;
             if (idx < 0) idx = songList.length - 1;
             playSong(idx);
         }
 
         function nextSong() {
+            if (playMode === 2) { playRandomSong(); return; }
             let idx = currentSongIndex + 1;
             if (idx >= songList.length) idx = 0;
             playSong(idx);
         }
 
-        audio.addEventListener('ended', nextSong);
+        function playRandomSong() {
+            let newIdx;
+            do {
+                newIdx = Math.floor(Math.random() * songList.length);
+            } while (newIdx === currentSongIndex && songList.length > 1);
+            playSong(newIdx);
+        }
 
+        function toggleMode() {
+            playMode = (playMode + 1) % 3;
+            modeBtn.textContent = modeIcons[playMode];
+            modeLabel.textContent = modeLabels[playMode];
+            audio.loop = (playMode === 1);
+        }
+
+        function updateUI() {
+            const song = songList[currentSongIndex];
+            currentSongName.textContent = song.name;
+            currentArtist.textContent = song.artist;
+            playBtn.textContent = isPlaying ? '⏸' : '▶';
+            musicToggle.textContent = isPlaying ? '🎶' : '🎵';
+            musicToggle.classList.toggle('playing', isPlaying);
+            renderPlaylist();
+        }
+
+        function updateProgress() {
+            if (isDraggingProgress) return;
+            if (audio.duration) {
+                const progress = audio.currentTime / audio.duration;
+                progressBar.value = progress;
+                timeDisplay.textContent = formatTime(audio.currentTime) + ' / ' + formatTime(audio.duration);
+            } else {
+                timeDisplay.textContent = '0:00 / 0:00';
+            }
+        }
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return mins + ':' + (secs < 10 ? '0' : '') + secs;
+        }
+
+        // 绑定音乐事件
+        playBtn.addEventListener('click', togglePlay);
+        prevBtn.addEventListener('click', prevSong);
+        nextBtn.addEventListener('click', nextSong);
+        progressBar.addEventListener('input', function() {
+            isDraggingProgress = true;
+            if (audio.duration) {
+                const newTime = parseFloat(this.value) * audio.duration;
+                audio.currentTime = newTime;
+                timeDisplay.textContent = formatTime(newTime) + ' / ' + formatTime(audio.duration);
+            }
+        });
+        progressBar.addEventListener('change', function() { isDraggingProgress = false; });
+        volumeSlider.addEventListener('input', function() {
+            audio.volume = parseFloat(this.value);
+            const vol = audio.volume;
+            if (vol === 0) volIcon.textContent = '🔇';
+            else if (vol < 0.5) volIcon.textContent = '🔉';
+            else volIcon.textContent = '🔊';
+        });
+        audio.volume = parseFloat(volumeSlider.value);
+        modeBtn.addEventListener('click', toggleMode);
+        modeBtn.textContent = modeIcons[playMode];
+        modeLabel.textContent = modeLabels[playMode];
+        toggleExtras.addEventListener('click', function() {
+            const isHidden = musicExtras.style.display === 'none';
+            musicExtras.style.display = isHidden ? 'block' : 'none';
+            this.textContent = '⚙️';
+        });
         musicToggle.addEventListener('click', (e) => {
             e.stopPropagation();
             const isPanelVisible = musicPanel.style.display !== 'none';
             musicPanel.style.display = isPanelVisible ? 'none' : 'block';
+            if (!isPanelVisible) updateProgress();
         });
-
-        playBtn.addEventListener('click', togglePlay);
-        prevBtn.addEventListener('click', prevSong);
-        nextBtn.addEventListener('click', nextSong);
+        document.addEventListener('click', function(e) {
+            const player = document.getElementById('musicPlayer');
+            if (player && !player.contains(e.target)) musicPanel.style.display = 'none';
+        });
+        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('loadedmetadata', updateProgress);
+        audio.addEventListener('ended', function() {
+            if (playMode === 1) return;
+            if (playMode === 2) playRandomSong();
+            else nextSong();
+        });
 
         window.addEventListener('load', () => {
             const firstSong = songList[0];
@@ -1660,27 +1663,25 @@
             audio.src = firstSong.src;
             audio.load();
             renderPlaylist();
+            timeDisplay.textContent = '0:00 / 0:00';
+            volumeSlider.value = '0.6';
+            audio.volume = 0.6;
         });
-
-        document.addEventListener('click', function(e) {
-            const player = document.getElementById('musicPlayer');
-            if (player && !player.contains(e.target)) {
-                musicPanel.style.display = 'none';
-            }
-        });
-
-        // ---- 应用初始化 ----
+                // ============================================================
+        //  📝 应用初始化与全局变量
+        // ============================================================
         let currentEditId = null;
         let pendingFiles = [];
         let allDiaries = [];
         let currentSlideIndex = 0;
         let slideImages = [];
-
-        // ---- 任务相关全局变量 ----
         let currentTaskDate = new Date();
         const taskStatusMap = { 0: '☐', 1: '◐', 2: '✅' };
         const taskStatusNext = { 0: 1, 1: 2, 2: 0 };
 
+        // ============================================================
+        //  🚀 应用初始化
+        // ============================================================
         function initApp() {
             updateTimer();
             setInterval(updateTimer, 1000);
@@ -1696,9 +1697,12 @@
             refreshAll();
             setupHeartButton();
             setupSlideshow();
+            setupVoiceRecorder();
         }
 
-        // ---- 计时器 ----
+        // ============================================================
+        //  ⏱️ 计时器
+        // ============================================================
         function updateTimer() {
             const diff = Math.max(0, Date.now() - LOVE_START);
             document.getElementById('tDays').textContent = Math.floor(diff / 86400000);
@@ -1707,7 +1711,9 @@
             document.getElementById('tSecs').textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
         }
 
-        // ---- 爱心（同步到数据库） ----
+        // ============================================================
+        //  ❤️ 爱心（同步到数据库）
+        // ============================================================
         async function loadHearts() {
             try {
                 const { data, error } = await supabaseClient
@@ -1765,7 +1771,9 @@
             };
         }
 
-        // ---- 场景切换 ----
+        // ============================================================
+        //  📌 场景切换与标签页
+        // ============================================================
         function setupSceneSwitch() {
             document.getElementById('enterGarden').onclick = () => {
                 document.getElementById('frontScene').classList.add('hidden');
@@ -1780,7 +1788,6 @@
             };
         }
 
-        // ---- 标签页 ----
         function setupTabs() {
             document.querySelectorAll('#mainTabs .tab').forEach(t => {
                 t.addEventListener('click', () => {
@@ -1802,18 +1809,15 @@
             });
         }
 
-        // ---- 工具：base64 转 Blob ----
-        function base64ToBlob(b64) {
-            const parts = b64.split(',');
-            const mime = parts[0].match(/:(.*?);/)[1];
-            const bytes = atob(parts[1]);
-            const ab = new ArrayBuffer(bytes.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < bytes.length; i++) ia[i] = bytes.charCodeAt(i);
-            return new Blob([ab], { type: mime });
-        }
+        // ============================================================
+        //  📝 日记（含语音日记）
+        // ============================================================
+        let recordedBlob = null;
+        let recordingSeconds = 0;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordingTimer = null;
 
-        // ---- 日记（使用 Storage 存储文件） ----
         function setupDiary() {
             document.querySelectorAll('.mood').forEach(m => {
                 m.onclick = () => {
@@ -1857,13 +1861,116 @@
             });
         }
 
+        // ============================================================
+        //  🎙️ 语音录制功能
+        // ============================================================
+        function setupVoiceRecorder() {
+            const startBtn = document.getElementById('startRecordBtn');
+            const stopBtn = document.getElementById('stopRecordBtn');
+            const playBtn = document.getElementById('playRecordBtn');
+            const deleteBtn = document.getElementById('deleteRecordBtn');
+            const recordedAudio = document.getElementById('recordedAudio');
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                startBtn.disabled = true;
+                startBtn.title = '您的浏览器不支持录音功能';
+                document.getElementById('recordingStatus').textContent = '❌ 浏览器不支持录音';
+                return;
+            }
+
+            startBtn.addEventListener('click', async function() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    recordingSeconds = 0;
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        recordedBlob = audioBlob;
+                        const url = URL.createObjectURL(audioBlob);
+                        recordedAudio.src = url;
+                        document.getElementById('recordedDuration').textContent = formatTime(recordingSeconds);
+                        document.getElementById('recordedAudioContainer').style.display = 'block';
+                        playBtn.style.display = 'inline-block';
+                        deleteBtn.style.display = 'inline-block';
+                        document.getElementById('recordingStatus').textContent = '✅ 录音完成，时长 ' + formatTime(recordingSeconds);
+                        document.getElementById('recordingStatus').style.color = 'var(--text-medium)';
+                        clearInterval(recordingTimer);
+                        document.getElementById('recordingTimer').style.display = 'none';
+                        startBtn.style.display = 'inline-block';
+                        stopBtn.style.display = 'none';
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    mediaRecorder.start();
+                    startBtn.style.display = 'none';
+                    stopBtn.style.display = 'inline-block';
+                    document.getElementById('recordingStatus').textContent = '🔴 录音中...';
+                    document.getElementById('recordingStatus').style.color = 'var(--rose)';
+                    document.getElementById('recordingTimer').style.display = 'inline';
+                    document.getElementById('recordingTimer').textContent = '⏱️ 00:00';
+
+                    clearInterval(recordingTimer);
+                    recordingTimer = setInterval(() => {
+                        recordingSeconds++;
+                        document.getElementById('recordingTimer').textContent = '⏱️ ' + formatTime(recordingSeconds);
+                    }, 1000);
+
+                } catch (err) {
+                    alert('无法访问麦克风，请检查权限设置：' + err.message);
+                    console.error('录音错误：', err);
+                }
+            });
+
+            stopBtn.addEventListener('click', function() {
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+            });
+
+            playBtn.addEventListener('click', function() {
+                if (recordedAudio.paused) {
+                    recordedAudio.play();
+                    playBtn.textContent = '⏸ 暂停';
+                } else {
+                    recordedAudio.pause();
+                    playBtn.textContent = '▶ 继续';
+                }
+            });
+            recordedAudio.addEventListener('ended', () => {
+                playBtn.textContent = '▶ 试听';
+            });
+
+            deleteBtn.addEventListener('click', function() {
+                if (confirm('确定删除这段录音吗？')) {
+                    recordedBlob = null;
+                    recordedAudio.src = '';
+                    document.getElementById('recordedAudioContainer').style.display = 'none';
+                    playBtn.style.display = 'none';
+                    deleteBtn.style.display = 'none';
+                    document.getElementById('recordingStatus').textContent = '🗑️ 已删除录音';
+                    document.getElementById('recordingStatus').style.color = 'var(--text-medium)';
+                    document.getElementById('transcriptContainer').style.display = 'none';
+                }
+            });
+        }
+
+        // ============================================================
+        //  💾 保存日记（含语音）
+        // ============================================================
         async function saveDiary() {
             const mood = document.querySelector('.mood.selected')?.dataset.mood || '🥰';
             const content = document.getElementById('diaryContent').value.trim();
-            if (!content && pendingFiles.length === 0) {
+            if (!content && pendingFiles.length === 0 && !recordedBlob) {
                 alert('写点什么吧～ 📝');
                 return;
             }
+
             const uploadedFiles = [];
             for (let file of pendingFiles) {
                 try {
@@ -1882,7 +1989,32 @@
                     return;
                 }
             }
-            const diary = { mood, content, files: uploadedFiles };
+
+            // 上传语音
+            let voiceUrl = null;
+            let voiceDuration = 0;
+            if (recordedBlob) {
+                try {
+                    const fileName = `voice_${Date.now()}.webm`;
+                    const { error } = await supabaseClient.storage.from(VOICE_BUCKET).upload(fileName, recordedBlob);
+                    if (error) throw error;
+                    const { data: urlData } = supabaseClient.storage.from(VOICE_BUCKET).getPublicUrl(fileName);
+                    voiceUrl = urlData.publicUrl;
+                    voiceDuration = recordingSeconds;
+                } catch (err) {
+                    alert('语音上传失败：' + err.message);
+                    return;
+                }
+            }
+
+            const diary = {
+                mood,
+                content,
+                files: uploadedFiles,
+                voice_url: voiceUrl,
+                voice_duration: voiceDuration
+            };
+
             try {
                 if (currentEditId) {
                     await supabaseClient.from('diaries').update(diary).eq('id', currentEditId);
@@ -1906,9 +2038,29 @@
             currentEditId = null;
             document.getElementById('cancelEditBtn').style.display = 'none';
             document.getElementById('saveDiaryBtn').textContent = '💾 保存日记';
+
+            // 重置语音
+            recordedBlob = null;
+            recordingSeconds = 0;
+            document.getElementById('recordedAudio').src = '';
+            document.getElementById('recordedAudioContainer').style.display = 'none';
+            document.getElementById('playRecordBtn').style.display = 'none';
+            document.getElementById('deleteRecordBtn').style.display = 'none';
+            document.getElementById('recordingStatus').textContent = '点击下方按钮开始录音';
+            document.getElementById('recordingStatus').style.color = 'var(--text-medium)';
+            document.getElementById('recordingTimer').style.display = 'none';
+            document.getElementById('startRecordBtn').style.display = 'inline-block';
+            document.getElementById('stopRecordBtn').style.display = 'none';
+            document.getElementById('transcriptContainer').style.display = 'none';
+            if (recordingTimer) {
+                clearInterval(recordingTimer);
+                recordingTimer = null;
+            }
         }
 
-        // ---- 渲染日记列表（包含评论功能） ----
+        // ============================================================
+        //  📋 渲染日记列表（含语音和评论）
+        // ============================================================
         function renderDiaryList(diaries) {
             const container = document.getElementById('diaryList');
             const monthFilter = document.getElementById('monthSelect').value;
@@ -1916,11 +2068,12 @@
             if (monthFilter !== 'all') {
                 filtered = diaries.filter(d => {
                     const date = new Date(d.created_at);
-                    const key = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0');
+                    const key = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
                     return key === monthFilter;
                 });
             }
             container.innerHTML = filtered.length ? '' : '<p style="text-align:center;color:var(--text-medium);padding:20px;">没有找到日记～</p>';
+
             filtered.forEach(d => {
                 let filesHtml = '';
                 if (d.files && d.files.length > 0) {
@@ -1936,6 +2089,17 @@
                         }
                     });
                 }
+
+                // 语音播放器
+                if (d.voice_url) {
+                    filesHtml += `
+                        <div style="margin-top:6px;">
+                            <audio controls src="${d.voice_url}" style="width:100%; max-width:300px; height:36px;"></audio>
+                            <span style="font-size:0.7rem; color:var(--text-medium);">🎙️ 语音日记 ${d.voice_duration ? '(' + formatTime(d.voice_duration) + ')' : ''}</span>
+                        </div>
+                    `;
+                }
+
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.dataset.diaryId = d.id;
@@ -1964,7 +2128,7 @@
                 `;
                 container.appendChild(card);
 
-                // ---- 绑定日记编辑/删除 ----
+                // 编辑/删除事件
                 card.querySelector('.edit-btn').onclick = async (e) => {
                     const id = e.target.dataset.id;
                     const { data } = await supabaseClient.from('diaries').select('*').eq('id', id).single();
@@ -1977,14 +2141,13 @@
                     }
                 };
 
-                // ---- 评论交互 ----
+                // 评论交互
                 const toggleBtn = card.querySelector('.toggle-comments');
                 const commentArea = card.querySelector('.comment-area');
                 const commentList = card.querySelector('.comment-list');
                 const commentInput = card.querySelector('.comment-input');
                 const submitBtn = card.querySelector('.comment-submit');
 
-                // 加载评论
                 const loadComments = async () => {
                     const { data: comments } = await supabaseClient
                         .from('diary_comments')
@@ -1993,7 +2156,6 @@
                         .order('created_at', { ascending: true });
                     const tree = buildCommentTree(comments || []);
                     renderCommentTree(tree, commentList);
-                    // 更新评论数
                     const count = comments ? comments.filter(c => !c.parent_id).length : 0;
                     card.querySelector(`.comment-count-${d.id}`).textContent = count;
                 };
@@ -2024,19 +2186,16 @@
                         alert('评论失败：' + err.message);
                     }
                 };
-
-                // 回车发送
                 commentInput.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') submitBtn.click();
                 });
-
-                // 初始加载评论（如果展开状态默认可不加载，但我们在点击时加载）
-                // 存储评论加载函数以便后续使用
                 card._loadComments = loadComments;
             });
         }
 
-        // ---- 评论树构建和渲染（类似留言板） ----
+        // ============================================================
+        //  🌳 评论树构建与渲染
+        // ============================================================
         function buildCommentTree(comments) {
             const map = {};
             const roots = [];
@@ -2078,7 +2237,6 @@
                 `;
                 container.appendChild(div);
 
-                // 点赞
                 div.querySelector('.like-btn').onclick = async (e) => {
                     e.stopPropagation();
                     const id = c.id;
@@ -2095,7 +2253,6 @@
                     const newLikes = newLikedBy.length;
                     try {
                         await supabaseClient.from('diary_comments').update({ likes: newLikes, liked_by: newLikedBy }).eq('id', id);
-                        // 重新加载评论（刷新整个列表）
                         const diaryId = container.closest('.card').dataset.diaryId;
                         if (diaryId && container.closest('.card')._loadComments) {
                             container.closest('.card')._loadComments();
@@ -2105,7 +2262,6 @@
                     }
                 };
 
-                // 回复显示/隐藏
                 div.querySelector('.reply-btn').onclick = (e) => {
                     e.stopPropagation();
                     const box = div.querySelector('.reply-box');
@@ -2113,7 +2269,6 @@
                     if (box.style.display === 'flex') box.querySelector('input').focus();
                 };
 
-                // 提交回复
                 div.querySelector('.submit-reply').onclick = async (e) => {
                     e.stopPropagation();
                     const input = div.querySelector('.reply-box input');
@@ -2141,7 +2296,6 @@
                     }
                 };
 
-                // 递归子回复
                 if (c.children && c.children.length > 0) {
                     const repliesContainer = div.querySelector('.replies');
                     renderCommentTree(c.children, repliesContainer, depth + 1);
@@ -2153,14 +2307,13 @@
             try {
                 const { data } = await supabaseClient.from('diaries').select('*').order('created_at', { ascending: false });
                 allDiaries = data || [];
-                // 更新月份下拉
                 const select = document.getElementById('monthSelect');
                 const currentVal = select.value;
                 select.innerHTML = '<option value="all">全部</option>';
                 const months = new Set();
                 allDiaries.forEach(d => {
                     const date = new Date(d.created_at);
-                    const key = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0');
+                    const key = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
                     months.add(key);
                 });
                 [...months].sort().forEach(m => {
@@ -2184,6 +2337,18 @@
             if (moodEl) moodEl.classList.add('selected');
             pendingFiles = [];
             document.getElementById('filePreview').innerHTML = '';
+            // 重置语音
+            recordedBlob = null;
+            recordingSeconds = 0;
+            document.getElementById('recordedAudio').src = '';
+            document.getElementById('recordedAudioContainer').style.display = 'none';
+            document.getElementById('playRecordBtn').style.display = 'none';
+            document.getElementById('deleteRecordBtn').style.display = 'none';
+            document.getElementById('recordingStatus').textContent = '点击下方按钮开始录音';
+            document.getElementById('recordingTimer').style.display = 'none';
+            document.getElementById('startRecordBtn').style.display = 'inline-block';
+            document.getElementById('stopRecordBtn').style.display = 'none';
+
             if (diary.files && diary.files.length > 0) {
                 const div = document.createElement('div');
                 div.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;padding:8px;background:#f9f0ed;border-radius:8px;';
@@ -2196,13 +2361,20 @@
                 });
                 document.getElementById('filePreview').appendChild(div);
             }
+            if (diary.voice_url) {
+                const div = document.createElement('div');
+                div.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;padding:8px;background:#f9f0ed;border-radius:8px;';
+                div.innerHTML = `<span style="font-weight:600;font-size:0.8rem;width:100%;">🎙️ 已有语音</span><span style="font-size:0.8rem;">${diary.voice_duration ? formatTime(diary.voice_duration) : ''}</span>`;
+                document.getElementById('filePreview').appendChild(div);
+            }
             currentEditId = diary.id;
             document.getElementById('cancelEditBtn').style.display = 'inline-block';
             document.getElementById('saveDiaryBtn').textContent = '✏️ 更新';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-
-        // ---- 打卡 ----
+                // ============================================================
+        //  ☑️ 打卡
+        // ============================================================
         function setupCheckin() {
             document.getElementById('addCheckBtn').onclick = async () => {
                 const title = document.getElementById('newCheckItem').value.trim();
@@ -2223,10 +2395,11 @@
             const year = now.getFullYear();
             const month = now.getMonth();
             const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month+1, 0).getDate();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            let html = '<div style="display:grid; grid-template-columns: repeat(7,1fr); gap:4px; background:white; padding:12px; border-radius:12px; box-shadow: var(--shadow);">';
-            ['日','一','二','三','四','五','六'].forEach(day => {
+            let html =
+                '<div style="display:grid; grid-template-columns: repeat(7,1fr); gap:4px; background:white; padding:12px; border-radius:12px; box-shadow: var(--shadow);">';
+            ['日', '一', '二', '三', '四', '五', '六'].forEach(day => {
                 html += `<div style="text-align:center;font-size:0.75rem;color:var(--text-medium);">${day}</div>`;
             });
             for (let i = 0; i < firstDay; i++) {
@@ -2234,7 +2407,7 @@
             }
             const dateSet = new Set(dates || []);
             for (let d = 1; d <= daysInMonth; d++) {
-                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const isToday = dateStr === new Date().toISOString().split('T')[0];
                 const hasCheck = dateSet.has(dateStr);
                 html += `<div style="text-align:center;padding:4px 0;border-radius:4px;font-size:0.85rem;
@@ -2250,7 +2423,8 @@
             const container = document.getElementById('checkinList');
             try {
                 const { data } = await supabaseClient.from('checkins').select('*').order('created_at');
-                container.innerHTML = data?.length ? '' : '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有打卡项目～ 添加一个吧 ☑️</p>';
+                container.innerHTML = data?.length ? '' :
+                    '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有打卡项目～ 添加一个吧 ☑️</p>';
                 if (data && data.length > 0) {
                     renderCalendar(data[0].dates || []);
                 } else {
@@ -2305,7 +2479,9 @@
             }
         }
 
-        // ---- 心愿 ----
+        // ============================================================
+        //  🌟 心愿
+        // ============================================================
         function setupWishes() {
             document.getElementById('addWishBtn').onclick = async () => {
                 const text = document.getElementById('newWish').value.trim();
@@ -2324,7 +2500,8 @@
             const container = document.getElementById('wishList');
             try {
                 const { data } = await supabaseClient.from('wishes').select('*').order('created_at');
-                container.innerHTML = data?.length ? '' : '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有心愿～ 一起许个愿吧 🌟</p>';
+                container.innerHTML = data?.length ? '' :
+                    '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有心愿～ 一起许个愿吧 🌟</p>';
                 data?.forEach(w => {
                     const div = document.createElement('div');
                     div.className = 'wish-item';
@@ -2354,7 +2531,9 @@
             }
         }
 
-        // ---- 任务系统 ----
+        // ============================================================
+        //  🎯 任务
+        // ============================================================
         function setupTasks() {
             document.getElementById('addTaskBtn').onclick = addTask;
             document.getElementById('newTaskInput').addEventListener('keydown', (e) => {
@@ -2387,8 +2566,8 @@
 
         function formatDate(date) {
             const y = date.getFullYear();
-            const m = String(date.getMonth()+1).padStart(2,'0');
-            const d = String(date.getDate()).padStart(2,'0');
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
             return y + '-' + m + '-' + d;
         }
 
@@ -2431,7 +2610,8 @@
                     .order('period', { ascending: true })
                     .order('created_at', { ascending: true });
                 if (!data || data.length === 0) {
-                    container.innerHTML = '<p style="text-align:center;color:var(--text-medium);padding:20px;">今天还没有任务，安排起来吧！💪</p>';
+                    container.innerHTML =
+                        '<p style="text-align:center;color:var(--text-medium);padding:20px;">今天还没有任务，安排起来吧！💪</p>';
                     return;
                 }
                 const groups = { '上午': [], '下午': [], '晚上': [], '其他': [] };
@@ -2490,7 +2670,9 @@
             }
         }
 
-        // ---- 留言（支持回复和点赞） ----
+        // ============================================================
+        //  💌 留言（支持回复和点赞）
+        // ============================================================
         function setupMessages() {
             document.getElementById('sendMsgBtn').onclick = async () => {
                 const text = document.getElementById('newMsg').value.trim();
@@ -2498,7 +2680,8 @@
                 const author = prompt('署名：小亮 或 瑶瑶？', '小亮');
                 if (!author) return;
                 try {
-                    await supabaseClient.from('messages').insert([{ text, author, parent_id: null, likes: 0, liked_by: [] }]);
+                    await supabaseClient.from('messages').insert([{ text, author, parent_id: null, likes: 0,
+                        liked_by: [] }]);
                     document.getElementById('newMsg').value = '';
                     loadMessages();
                 } catch (err) {
@@ -2565,7 +2748,8 @@
                     }
                     const newLikes = newLikedBy.length;
                     try {
-                        await supabaseClient.from('messages').update({ likes: newLikes, liked_by: newLikedBy }).eq('id', id);
+                        await supabaseClient.from('messages').update({ likes: newLikes, liked_by: newLikedBy }).eq(
+                        'id', id);
                         loadMessages();
                     } catch (err) {
                         alert('点赞失败：' + err.message);
@@ -2618,17 +2802,20 @@
                 const tree = buildMessageTree(data || []);
                 container.innerHTML = '';
                 if (tree.length === 0) {
-                    container.innerHTML = '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有留言～ 写下第一句情话吧 💌</p>';
+                    container.innerHTML =
+                        '<p style="text-align:center;color:var(--text-medium);padding:20px;">还没有留言～ 写下第一句情话吧 💌</p>';
                     return;
                 }
-                tree.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+                tree.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                 renderMessageTree(tree, container);
             } catch (err) {
                 container.innerHTML = `<p style="text-align:center;color:var(--rose-dark);">⚠️ 加载失败，请检查 Supabase 配置</p>`;
             }
         }
 
-        // ---- 回忆盒 ----
+        // ============================================================
+        //  🖼️ 回忆盒
+        // ============================================================
         function setupGallery() {
             document.querySelectorAll('.filter-btn').forEach(b => {
                 b.onclick = () => {
@@ -2656,7 +2843,8 @@
                         if (filter === 'image') return f.type?.startsWith('image/');
                         if (filter === 'video') return f.type?.startsWith('video/');
                         if (filter === 'audio') return f.type?.startsWith('audio/');
-                        if (filter === 'other') return !f.type?.startsWith('image/') && !f.type?.startsWith('video/') &&
+                        if (filter === 'other') return !f.type?.startsWith('image/') && !f.type?.startsWith(
+                            'video/') &&
                             !f.type?.startsWith('audio/');
                         return true;
                     });
@@ -2706,7 +2894,9 @@
             }
         }
 
-        // ---- 幻灯片 ----
+        // ============================================================
+        //  📽️ 幻灯片
+        // ============================================================
         function setupSlideshow() {
             const modal = document.getElementById('slideshowModal');
             document.getElementById('closeSlideshow').onclick = closeSlideshow;
@@ -2776,7 +2966,9 @@
             }
         }
 
-        // ---- 刷新所有 ----
+        // ============================================================
+        //  🔄 刷新所有
+        // ============================================================
         function refreshAll() {
             loadDiaries();
             loadCheckins();
@@ -2787,7 +2979,7 @@
         }
 
         // ============================================================
-        //  🌸 花 瓣 + 爱 心 粒 子 动 画
+        //  🌸 花瓣 + 爱心粒子动画
         // ============================================================
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
@@ -2848,7 +3040,7 @@
                     ctx.ellipse(0, 0, this.size * 0.5, this.size * 0.2, 0, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.globalAlpha = this.opacity * 0.3;
-                    ctx.strokeStyle = `rgb(${this.color[0]-30},${this.color[1]-30},${this.color[2]-30})`;
+                    ctx.strokeStyle = `rgb(${this.color[0] - 30},${this.color[1] - 30},${this.color[2] - 30})`;
                     ctx.lineWidth = 0.5;
                     ctx.beginPath();
                     ctx.moveTo(-this.size * 0.3, 0);
@@ -2896,8 +3088,9 @@
         resizeCanvas();
         animateParticles();
 
-        console.log('🌸 小亮 ❤️ 瑶瑶 · 秘密花园 完整版已加载！');
-        console.log('📦 存储桶名称：', STORAGE_BUCKET);
+        console.log('📖 小亮 ❤️ 瑶瑶 · 拾光馆 已加载！');
+        console.log('💡 密码: 520471');
+        console.log('📦 存储桶: ' + STORAGE_BUCKET + ', ' + VOICE_BUCKET);
     </script>
 </body>
 </html>
