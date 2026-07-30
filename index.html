@@ -1493,9 +1493,119 @@
 
     <script>
         // ============================================================
+        //  🔐 登录认证相关
+        // ============================================================
+        async function checkAuth() {
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            if (error) {
+                console.error('获取会话失败：', error);
+                return null;
+            }
+            if (session) {
+                // 额外检查：是否是小亮或瑶瑶的邮箱（可选，但建议）
+                const allowedEmails = ['wolves_champion@outlook.com', '15388451317@163.com'];
+                if (!allowedEmails.includes(session.user.email)) {
+                    // 如果登录的邮箱不是你们两个，强制登出
+                    await supabaseClient.auth.signOut();
+                    showLoginModal('邮箱不在允许列表中');
+                    return null;
+                }
+                return session;
+            }
+            // 未登录，显示登录弹窗
+            showLoginModal();
+            return null;
+        }
+        
+        function showLoginModal(errorMsg = '') {
+            // 如果已存在弹窗，先移除
+            const oldModal = document.getElementById('loginModal');
+            if (oldModal) oldModal.remove();
+        
+            const modal = document.createElement('div');
+            modal.id = 'loginModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                background: rgba(0,0,0,0.5);
+                backdrop-filter: blur(8px);
+                z-index: 99999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                animation: fadeIn 0.3s ease;
+            `;
+            modal.innerHTML = `
+                <div style="
+                    background: white;
+                    padding: 40px 35px;
+                    border-radius: 24px;
+                    max-width: 400px;
+                    width: 90%;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                    text-align: center;
+                ">
+                    <div style="font-size: 3rem; margin-bottom: 6px;">🔐</div>
+                    <h2 style="font-size: 1.6rem; color: var(--text-dark); margin-bottom: 4px;">拾光馆</h2>
+                    <p style="color: var(--text-medium); font-size: 0.9rem; margin-bottom: 24px;">仅限小亮和瑶瑶访问</p>
+                    <div style="text-align: left; margin-bottom: 16px;">
+                        <label style="display: block; font-size: 0.85rem; color: var(--text-medium); margin-bottom: 4px;">邮箱</label>
+                        <input type="email" id="loginEmail" placeholder="输入邮箱" style="width:100%; padding: 10px 14px; border-radius: 12px; border: 1.5px solid #f0d3d5; font-size: 1rem; outline: none;" />
+                    </div>
+                    <div style="text-align: left; margin-bottom: 24px;">
+                        <label style="display: block; font-size: 0.85rem; color: var(--text-medium); margin-bottom: 4px;">密码</label>
+                        <input type="password" id="loginPassword" placeholder="输入密码" style="width:100%; padding: 10px 14px; border-radius: 12px; border: 1.5px solid #f0d3d5; font-size: 1rem; outline: none;" />
+                    </div>
+                    <button id="loginSubmitBtn" style="
+                        width: 100%;
+                        padding: 12px;
+                        border: none;
+                        border-radius: 12px;
+                        background: linear-gradient(135deg, #e8878a, #d47073);
+                        color: white;
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: 0.2s;
+                    ">🌸 进入拾光馆</button>
+                    <p id="loginError" style="color: #d47073; font-size: 0.85rem; margin-top: 12px; display: ${errorMsg ? 'block' : 'none'};">${errorMsg || '登录失败，请检查邮箱和密码'}</p>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        
+            // 监听登录按钮
+            document.getElementById('loginSubmitBtn').addEventListener('click', async () => {
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+                if (!email || !password) {
+                    document.getElementById('loginError').textContent = '请输入邮箱和密码';
+                    document.getElementById('loginError').style.display = 'block';
+                    return;
+                }
+                const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) {
+                    document.getElementById('loginError').textContent = '登录失败：' + error.message;
+                    document.getElementById('loginError').style.display = 'block';
+                } else {
+                    // 登录成功，刷新页面
+                    location.reload();
+                }
+            });
+        
+            // 回车键触发登录
+            document.getElementById('loginPassword').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById('loginSubmitBtn').click();
+            });
+            document.getElementById('loginEmail').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById('loginSubmitBtn').click();
+            });
+        }
+        
+        
+        // ============================================================
         //  🔐 配 置 区 （请修改为你的 Supabase 信息）
         // ============================================================
-        const SECRET_PASSWORD = '520471';  // 密码已改为 520471
         const SUPABASE_URL = 'https://ldqauibuqwpwwtjoihjk.supabase.co';     // 替换为你的 Supabase URL
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcWF1aWJ1cXdwd3d0am9paGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMjA5MjMsImV4cCI6MjEwMDc5NjkyM30.PxxJn1IKE4ck3WszrmPGr5gcL_j7wcmPjawHMbhlhcU';                        // 替换为你的 anon key
         const LOVE_START = new Date('2026-07-01T00:00:00');
@@ -1526,64 +1636,6 @@
         // ============================================================
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // ============================================================
-        //  DOM 引用与登录逻辑
-        // ============================================================
-        const loginPage = document.getElementById('loginPage');
-        const app = document.getElementById('app');
-        const passwordInput = document.getElementById('passwordInput');
-        const loginBtn = document.getElementById('loginBtn');
-        const loginError = document.getElementById('loginError');
-
-        function checkAuth() {
-            const saved = localStorage.getItem('shiguang_auth');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    if (data.expiry && Date.now() < data.expiry) return true;
-                } catch (_) {}
-            }
-            return false;
-        }
-
-        function setAuth() {
-            const expiry = Date.now() + 7 * 24 * 60 * 60 * 1000;
-            localStorage.setItem('shiguang_auth', JSON.stringify({ expiry }));
-        }
-
-        function doLogin() {
-            const input = passwordInput.value.trim();
-            if (input === SECRET_PASSWORD) {
-                setAuth();
-                loginPage.classList.add('hidden');
-                app.classList.add('visible');
-                document.body.style.overflow = 'auto';
-                initApp();
-                loginError.classList.remove('show');
-                passwordInput.value = '';
-                passwordInput.blur();
-            } else {
-                loginError.classList.add('show');
-                passwordInput.value = '';
-                passwordInput.focus();
-                setTimeout(() => loginError.classList.remove('show'), 3000);
-            }
-        }
-
-        passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
-        loginBtn.addEventListener('click', doLogin);
-
-        if (checkAuth()) {
-            loginPage.classList.add('hidden');
-            app.classList.add('visible');
-            document.body.style.overflow = 'auto';
-            setTimeout(() => initApp(), 100);
-        } else {
-            loginPage.classList.remove('hidden');
-            app.classList.remove('visible');
-            document.body.style.overflow = 'hidden';
-            setTimeout(() => passwordInput.focus(), 400);
-        }
 
         // ============================================================
         //  🎵 音乐播放器增强逻辑
@@ -1882,7 +1934,16 @@
         // ============================================================
         //  🚀 应用初始化
         // ============================================================
-        function initApp() {
+        async function initApp() {
+            // 1. 检查登录状态
+            const session = await checkAuth();
+            if (!session) {
+                // 未登录，显示登录弹窗，不执行后续初始化
+                return;
+            }
+        
+            // 2. 已登录，保存用户信息并初始化
+            window.currentUser = session.user;
             updateTimer();
             setInterval(updateTimer, 1000);
             loadHearts();
@@ -2212,7 +2273,8 @@
                 content,
                 files: uploadedFiles,
                 voice_url: voiceUrl,
-                voice_duration: voiceDuration
+                voice_duration: voiceDuration,
+                user_id: window.currentUser.id 
             };
 
             try {
@@ -2378,7 +2440,8 @@
                             author,
                             text,
                             likes: 0,
-                            liked_by: []
+                            liked_by: [],
+                            user_id: window.currentUser.id  // 👈 添加这一行
                         });
                         commentInput.value = '';
                         loadComments();
@@ -2458,7 +2521,8 @@
                             author,
                             text,
                             likes: 0,
-                            liked_by: []
+                            liked_by: [],
+                            user_id: window.currentUser.id  // 👈 添加这一行
                         });
                         input.value = '';
                         div.querySelector('.reply-box').style.display = 'none';
@@ -2554,7 +2618,12 @@
                 const title = document.getElementById('newCheckItem').value.trim();
                 if (!title) return alert('请输入打卡项目名称');
                 try {
-                    await supabaseClient.from('checkins').insert([{ title, streak: 0, dates: [] }]);
+                    await supabaseClient.from('checkins').insert([{ 
+                        title, 
+                        streak: 0, 
+                        dates: [],
+                        user_id: window.currentUser.id  
+                    }]);
                     document.getElementById('newCheckItem').value = '';
                     loadCheckins();
                 } catch (err) {
@@ -2765,7 +2834,8 @@
                     period: period,
                     text: text,
                     status: 0,
-                    author: '共同'
+                    author: '共同',
+                    user_id: window.currentUser.id  // 👈 添加这一行
                 }]);
                 input.value = '';
                 loadTasks();
@@ -2854,8 +2924,14 @@
                 const author = await chooseAuthor();
                 if (!author) return;
                 try {
-                    await supabaseClient.from('messages').insert([{ text, author, parent_id: null, likes: 0,
-                        liked_by: [] }]);
+                    await supabaseClient.from('messages').insert([{ 
+                        text, 
+                        author, 
+                        parent_id: null, 
+                        likes: 0, 
+                        liked_by: [],
+                        user_id: window.currentUser.id  // 👈 添加这一行
+                    }]);
                     document.getElementById('newMsg').value = '';
                     loadMessages();
                 } catch (err) {
@@ -2926,7 +3002,8 @@
                             author,
                             parent_id: m.id,
                             likes: 0,
-                            liked_by: []
+                            liked_by: [],
+                            user_id: window.currentUser.id  // 添加这一行
                         });
                         input.value = '';
                         div.querySelector('.reply-box').style.display = 'none';
