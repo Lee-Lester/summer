@@ -1896,14 +1896,18 @@
         }
 
         // ============================================================
-        //  🌙 深夜模式浪漫暗语
+        //  🌙 深夜模式浪漫暗语（终极防报错防缓存版）
         // ============================================================
         function checkLateNight() {
             const hour = new Date().getHours();
             const p = document.getElementById('homeSubtitle');
+            
+            // 【核心保护】加上这句后，如果id没找到，它直接静默退出，绝对不报错！
+            if (!p) return; 
+
             if (hour >= 23 || hour < 6) {
                 p.textContent = '夜深了，我在想你 🌙';
-                p.style.color = 'var(--rose-dark)'; // 深夜切换为玫瑰色
+                p.style.color = 'var(--rose-dark)'; 
                 p.style.fontWeight = '500';
             } else {
                 p.textContent = '遇见你，是小亮此生最美的意外 ✨';
