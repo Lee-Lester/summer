@@ -1249,7 +1249,7 @@
                         <button class="tab" data-tab="wishes">🌟 心愿</button>
                         <button class="tab" data-tab="tasks">🎯 任务</button>
                         <button class="tab" data-tab="messages">💌 留言</button>
-                        <button class="tab" data-tab="gallery">🖼️ 回忆盒</button>
+                        <button class="tab" data-tab="money">💰 私房钱</button>
                     </div>
                     <button class="back-btn" id="backToFront">🏠 返回</button>
                     <button id="logoutBtn" style="background:#e8878a; border:none; border-radius:30px; padding:6px 18px; cursor:pointer; color:white; font-size:0.9rem; font-weight:bold; margin-left:6px;">🚪 退出账号</button>
@@ -1386,6 +1386,25 @@
                     </div>
                 </div>
 
+                
+                <!-- ===== 私房钱 ===== -->
+                <div id="panel-money" class="panel">
+                  <div class="card">
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+                      <select id="moneyType" style="flex:1; min-width:100px; padding:10px; border-radius:12px; border:1.5px solid #f0d3d5;">
+                        <option value="income">💰 存入</option>
+                        <option value="expense">💸 支出</option>
+                      </select>
+                      <input type="number" id="moneyAmount" placeholder="金额（元）" step="0.01" min="0.01" style="flex:1; min-width:100px;" />
+                      <input type="text" id="moneyDesc" placeholder="备注（如：奶茶、工资）" style="flex:2; min-width:150px;" />
+                      <button class="btn primary" id="addMoneyBtn">📝 记账</button>
+                    </div>
+                    <div id="transactionList"></div>
+                    <div style="text-align:right; margin-top:12px; font-weight:600;" id="currentBalance">💰 当前余额：0.00 元</div>
+                  </div>
+                </div>
+
+                
                 <!-- ===== 留言面板 ===== -->
                 <div id="panel-messages" class="panel">
                     <div class="card" style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -1395,32 +1414,12 @@
                     <div id="msgList"></div>
                 </div>
 
-                <!-- ===== 回忆盒面板 ===== -->
-                <div id="panel-gallery" class="panel">
-                    <div class="filter-group">
-                        <button class="filter-btn active" data-type="all">全部</button>
-                        <button class="filter-btn" data-type="image">🖼️ 图片</button>
-                        <button class="filter-btn" data-type="video">🎬 视频</button>
-                        <button class="filter-btn" data-type="audio">🎵 音频</button>
-                        <button class="filter-btn" data-type="other">📄 文档</button>
-                    </div>
-                    <button class="btn primary" id="slideshowBtn" style="margin-bottom:12px;">📽️ 幻灯片播放</button>
-                    <div id="galleryGrid" class="gallery-grid"></div>
-                </div>
+                
             </div>
         </div>
     </div>
 
-    <!-- ===== 幻灯片模态框 ===== -->
-    <div id="slideshowModal" class="slideshow-modal">
-        <button class="close-slideshow" id="closeSlideshow">&times;</button>
-        <div class="controls">
-            <button id="prevSlide">&#10094;</button>
-            <button id="nextSlide">&#10095;</button>
-        </div>
-        <img id="slideImage" src="" alt="幻灯片" />
-        <div class="indicators" id="slideIndicators"></div>
-    </div>
+   
 
     <script>
         // ============================================================
@@ -1893,27 +1892,42 @@
             setupHeartButton();
             setupSlideshow();
             setupVoiceRecorder();
+            
         }
 
         // ============================================================
         //  🌙 深夜模式浪漫暗语（终极防报错防缓存版）
         // ============================================================
         function checkLateNight() {
-            const hour = new Date().getHours();
-            const p = document.getElementById('homeSubtitle');
-            
-            // 【核心保护】加上这句后，如果id没找到，它直接静默退出，绝对不报错！
-            if (!p) return; 
-
-            if (hour >= 23 || hour < 6) {
-                p.textContent = '夜深了，我在想你 🌙';
-                p.style.color = 'var(--rose-dark)'; 
-                p.style.fontWeight = '500';
-            } else {
-                p.textContent = '遇见你，是小亮此生最美的意外 ✨';
-                p.style.color = 'var(--text-medium)';
-                p.style.fontWeight = '400';
-            }
+          const hour = new Date().getHours();
+          const isNight = hour >= 19 || hour < 6;
+          const p = document.getElementById('homeSubtitle');
+          if (!p) return;
+          
+          if (isNight) {
+            p.textContent = '夜深了，星星在说我想你 🌙';
+            p.style.color = '#c0b9dd';
+            p.style.fontWeight = '500';
+            // 应用夜间风格到 body
+            document.body.style.background = 'linear-gradient(170deg, #1a1c2b 0%, #2d1f3d 40%, #1e2a38 80%)';
+            document.documentElement.style.setProperty('--rose', '#a78bfa');
+            document.documentElement.style.setProperty('--rose-dark', '#7c3aed');
+            document.documentElement.style.setProperty('--rose-light', '#312e81');
+            document.documentElement.style.setProperty('--text-dark', '#e0d7fe');
+            document.documentElement.style.setProperty('--text-medium', '#a5b4fc');
+            // 可以增加其他元素样式
+          } else {
+            p.textContent = '遇见你，是小亮此生意外的美好 ✨';
+            p.style.color = 'var(--text-medium)';
+            p.style.fontWeight = '400';
+            // 恢复白天样式
+            document.body.style.background = 'linear-gradient(170deg, #fef5f0 0%, #fce8e6 20%, #fdf0ed 40%, #fef6f2 60%, #fbe9e7 80%)';
+            document.documentElement.style.setProperty('--rose', '#e8878a');
+            document.documentElement.style.setProperty('--rose-dark', '#c96b6e');
+            document.documentElement.style.setProperty('--rose-light', '#f9e0de');
+            document.documentElement.style.setProperty('--text-dark', '#4a3335');
+            document.documentElement.style.setProperty('--text-medium', '#7a5c5e');
+          }
         }
         
         // ============================================================
@@ -2031,8 +2045,7 @@
                         checkin: loadCheckins,
                         wishes: loadWishes,
                         tasks: loadTasks,
-                        messages: loadMessages,
-                        gallery: () => loadGallery(document.querySelector('.filter-btn.active')?.dataset.type || 'all')
+                        messages: loadMessages
                     };
                     if (map[t.dataset.tab]) map[t.dataset.tab]();
                 });
@@ -2372,6 +2385,17 @@
                         </div>
                     </div>
                 `;
+                
+                // 异步加载该日记的评论数量
+                (async () => {
+                  const { count } = await supabaseClient
+                    .from('diary_comments')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('diary_id', d.id);
+                  const commentCountEl = card.querySelector(`.comment-count-${d.id}`);
+                  if (commentCountEl) commentCountEl.textContent = count || 0;
+                })();    
+                
                 container.appendChild(card);
 
                 // 编辑/删除事件
@@ -3433,174 +3457,80 @@
             }
         }
 
-        // ============================================================
-        //  🖼️ 回忆盒
-        // ============================================================
-        function setupGallery() {
-            document.querySelectorAll('.filter-btn').forEach(b => {
-                b.onclick = () => {
-                    document.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active'));
-                    b.classList.add('active');
-                    loadGallery(b.dataset.type);
-                };
-            });
-            document.getElementById('slideshowBtn').onclick = startSlideshow;
-        }
-
-        let allGalleryFiles = [];
-
-        async function loadGallery(filter = 'all') {
-            const grid = document.getElementById('galleryGrid');
-            try {
-                const { data } = await supabaseClient.from('diaries').select('files');
-                let allFiles = [];
-                data?.forEach(d => {
-                    if (d.files) d.files.forEach(f => allFiles.push({ ...f, diary_date: d.created_at }));
-                });
-                allGalleryFiles = allFiles;
-                if (filter !== 'all') {
-                    allFiles = allFiles.filter(f => {
-                        if (filter === 'image') return f.type?.startsWith('image/');
-                        if (filter === 'video') return f.type?.startsWith('video/');
-                        if (filter === 'audio') return f.type?.startsWith('audio/');
-                        if (filter === 'other') return !f.type?.startsWith('image/') && !f.type?.startsWith(
-                            'video/') &&
-                            !f.type?.startsWith('audio/');
-                        return true;
-                    });
-                }
-                grid.innerHTML = allFiles.length ? '' :
-                    '<p style="text-align:center;color:var(--text-medium);padding:20px;width:100%;">还没有文件～ 在日记里上传吧 📸</p>';
-                allFiles.forEach(f => {
-                    const item = document.createElement('div');
-                    item.className = 'gallery-item';
-                    if (f.type?.startsWith('image/')) {
-                        item.innerHTML = `
-                            <img src="${f.url}" class="thumb" alt="${f.name}" />
-                            <div class="name">${f.name}</div>
-                        `;
-                    } else if (f.type?.startsWith('video/')) {
-                        item.innerHTML = `
-                            <video src="${f.url}" class="thumb" muted></video>
-                            <div class="name">🎬 ${f.name}</div>
-                        `;
-                    } else if (f.type?.startsWith('audio/')) {
-                        item.innerHTML = `
-                            <div style="height:80px;display:flex;align-items:center;justify-content:center;font-size:36px;background:#f5f0ed;border-radius:8px;">🎵</div>
-                            <div class="name">${f.name}</div>
-                            <audio controls src="${f.url}" style="width:100%;height:28px;margin-top:4px;"></audio>
-                        `;
-                    } else {
-                        item.innerHTML = `
-                            <a href="${f.url}" download="${f.name}" style="text-decoration:none;">
-                                <div style="height:80px;display:flex;align-items:center;justify-content:center;font-size:36px;background:#f5f0ed;border-radius:8px;">📄</div>
-                                <div class="name">${f.name}</div>
-                            </a>
-                        `;
-                    }
-                    grid.appendChild(item);
-                });
-                grid.querySelectorAll('.gallery-item img').forEach((img, idx) => {
-                    img.parentElement.onclick = () => {
-                        const imageFiles = allFiles.filter(f => f.type?.startsWith('image/'));
-                        const index = imageFiles.findIndex(f => f.url === img.src);
-                        if (index !== -1) {
-                            startSlideshow(index);
-                        }
-                    };
-                });
-            } catch (err) {
-                grid.innerHTML = `<p style="text-align:center;color:var(--rose-dark);width:100%;">⚠️ 加载失败，请检查 Supabase 配置</p>`;
+       
+         // 记账相关函数
+        async function loadTransactions() {
+          const container = document.getElementById('transactionList');
+          const balanceEl = document.getElementById('currentBalance');
+          try {
+            const { data, error } = await supabaseClient
+              .from('transactions')
+              .select('*')
+              .order('created_at', { ascending: false });
+            if (error) throw error;
+            if (!data || data.length === 0) {
+              container.innerHTML = '<p style="text-align:center;color:var(--text-medium);">还没有记账记录</p>';
+              balanceEl.textContent = '💰 当前私房钱：0.00 元';
+              return;
             }
-        }
-
-        // ============================================================
-        //  📽️ 幻灯片（已修复计时器漏洞）
-        // ============================================================
-        function setupSlideshow() {
-            const modal = document.getElementById('slideshowModal');
-            document.getElementById('closeSlideshow').onclick = closeSlideshow;
-            document.getElementById('prevSlide').onclick = () => changeSlide(-1);
-            document.getElementById('nextSlide').onclick = () => changeSlide(1);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) closeSlideshow();
-            });
-            document.addEventListener('keydown', (e) => {
-                if (!modal.classList.contains('active')) return;
-                if (e.key === 'Escape') closeSlideshow();
-                if (e.key === 'ArrowLeft') changeSlide(-1);
-                if (e.key === 'ArrowRight') changeSlide(1);
-            });
-            
-            // 【已修复】统一使用全局变量 slideshowTimer，防止定时器冲突
-            modal.addEventListener('mouseenter', () => {
-                if (slideshowTimer) {
-                    clearInterval(slideshowTimer);
-                    slideshowTimer = null;
-                }
-            });
-            modal.addEventListener('mouseleave', () => {
-                if (modal.classList.contains('active') && !slideshowTimer) {
-                    slideshowTimer = setInterval(() => changeSlide(1), 3000);
-                }
-            });
+            // 计算余额（最新记录的 balance 即为当前余额）
+            const latest = data[0];
+            balanceEl.textContent = `💰 当前私房钱：${Number(latest.balance).toFixed(2)} 元`;
+            container.innerHTML = data.map(t => {
+              const sign = t.type === 'income' ? '+' : '-';
+              const color = t.type === 'income' ? '#2e7d32' : '#c62828';
+              return `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f0d3d5;">
+                  <span style="color:${color}; font-weight:600;">${sign}${Number(t.amount).toFixed(2)}</span>
+                  <span style="flex:1; margin:0 8px; color:var(--text-medium); font-size:0.9rem;">${t.description || '-'}</span>
+                  <span style="font-size:0.8rem; color:var(--text-medium);">${new Date(t.created_at).toLocaleString()}</span>
+                </div>
+              `;
+            }).join('');
+          } catch (err) {
+            container.innerHTML = '<p style="color:var(--rose-dark);">加载失败</p>';
+          }
         }
         
-        function startSlideshow(startIndex = 0) {
-            const imageFiles = allGalleryFiles.filter(f => f.type?.startsWith('image/'));
-            if (imageFiles.length === 0) {
-                alert('还没有图片可以播放～');
-                return;
-            }
-            slideImages = imageFiles;
-            // 确保 startIndex 在有效范围内
-            currentSlideIndex = Math.max(0, Math.min(startIndex, slideImages.length - 1));
-            const modal = document.getElementById('slideshowModal');
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            showSlide(currentSlideIndex);
-            // 指示器
-            const ind = document.getElementById('slideIndicators');
-            ind.innerHTML = slideImages.map((_, i) =>
-                `<span class="${i === currentSlideIndex ? 'active' : ''}"></span>`
-            ).join('');
-            
-            // 清除旧定时器，启动新定时器
-            if (slideshowTimer) {
-                clearInterval(slideshowTimer);
-                slideshowTimer = null;
-            }
-            slideshowTimer = setInterval(() => changeSlide(1), 3000);
-        }
-
-        function showSlide(index) {
-            const img = document.getElementById('slideImage');
-            img.src = slideImages[index].url;
-            img.alt = slideImages[index].name;
-            document.querySelectorAll('#slideIndicators span').forEach((el, i) => {
-                el.classList.toggle('active', i === index);
-            });
-        }
-
-        function changeSlide(delta) {
-            if (!slideImages.length) return;
-            // 正确循环
-            let newIndex = currentSlideIndex + delta;
-            if (newIndex < 0) newIndex = slideImages.length - 1;
-            if (newIndex >= slideImages.length) newIndex = 0;
-            currentSlideIndex = newIndex;
-            showSlide(currentSlideIndex);
+        async function addTransaction() {
+          const type = document.getElementById('moneyType').value;
+          const amount = parseFloat(document.getElementById('moneyAmount').value);
+          const desc = document.getElementById('moneyDesc').value.trim();
+          if (!amount || amount <= 0) return alert('请输入正确金额');
+          // 获取当前余额
+          const { data: last } = await supabaseClient
+            .from('transactions')
+            .select('balance')
+            .order('created_at', { ascending: false })
+            .limit(1);
+          let currentBalance = last && last.length > 0 ? Number(last[0].balance) : 0;
+          const newBalance = type === 'income' ? currentBalance + amount : currentBalance - amount;
+          try {
+            const { error } = await supabaseClient
+              .from('transactions')
+              .insert([{
+                type,
+                amount,
+                description: desc,
+                balance: newBalance,
+                user_id: window.currentUser.id
+              }]);
+            if (error) throw error;
+            document.getElementById('moneyAmount').value = '';
+            document.getElementById('moneyDesc').value = '';
+            loadTransactions();
+          } catch (err) {
+            alert('记账失败：' + err.message);
+          }
         }
         
-        function closeSlideshow() {
-            const modal = document.getElementById('slideshowModal');
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            if (slideshowTimer) {
-                clearInterval(slideshowTimer);
-                slideshowTimer = null;
-            }
-        }
+        function setupMoney() {
+          document.getElementById('addMoneyBtn').onclick = addTransaction;
+          document.getElementById('moneyAmount').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') addTransaction();
+          });
+        }       
+
 
         // ============================================================
         //  🔄 刷新所有
@@ -3611,7 +3541,7 @@
             loadWishes();
             loadTasks();
             loadMessages();
-            loadGallery('all');
+          
         }
 
         // ============================================================
