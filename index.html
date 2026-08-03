@@ -849,7 +849,7 @@
                 }
                 const mood = document.querySelector('.mood.selected')?.dataset.mood || '🥰';
                 const content = document.getElementById('diaryContent').value.trim();
-                const isPrivate = false;
+                const isPrivate = false; // 后续可加开关
                 if (!content && !pendingFiles.length && !recordedBlob) {
                     alert('写点什么吧～');
                     return;
@@ -872,7 +872,24 @@
                     voicePath = fileName;
                     voiceDuration = recordingSeconds;
                 }
-                const diary = { mood, content, files: uploadedFiles, voice_url: voiceUrl, voice_path: voicePath, voice_duration: voiceDuration, user_id: uid, is_private: isPrivate };
+
+                // 🌤️【新增】抓取北京和上海的两地天气
+                let weatherBeijing = '获取失败', weatherShanghai = '获取失败';
+                try {
+                    // 使用免费无密钥的 wttr.in 接口，获取天气状况 + 温度
+                    const res1 = await fetch('https://wttr.in/Beijing?format=%C+%t');
+                    const res2 = await fetch('https://wttr.in/Shanghai?format=%C+%t');
+                    if (res1.ok) weatherBeijing = await res1.text();
+                    if (res2.ok) weatherShanghai = await res2.text();
+                } catch (e) { /* 获取失败则保留默认值 */ }
+
+                const diary = { 
+                    mood, content, files: uploadedFiles, 
+                    voice_url: voiceUrl, voice_path: voicePath, voice_duration: voiceDuration, 
+                    user_id: uid, is_private: isPrivate,
+                    weather_beijing: weatherBeijing,  // 🌤️ 存入数据库
+                    weather_shanghai: weatherShanghai // 🌤️ 存入数据库
+                };
                 
                 let newDiaryId = null;
                 if (currentEditId) {
@@ -934,9 +951,7 @@
         //  模块十：日记分页与列表渲染（续）
         // ================================================================
         // 内容待下一条回复...
-        </script>
-        <!-- ==================== 第三部分：完整剩余 JavaScript 逻辑 ==================== -->
-        <script>
+
         // ================================================================
         //  模块十：日记分页与列表渲染（续）
         // ================================================================
@@ -1046,14 +1061,37 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.dataset.diaryId = d.id;
-                const authorName = d.user_id === window.currentUser?.id ? '我' : 'Ta';
+                
+                // 🆕 从 profiles 获取昵称，并用头像
+                let authorName = d.user_id === window.currentUser?.id ? '我' : 'Ta';
+                let avatarUrl = 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'; // 默认头像
+                try {
+                    // 查询作者资料（这里做一个轻量查询，如果您觉得太慢，也可以在渲染前用一次 Promise.all 批量加载）
+                    const { data: profile } = await supabaseClient.from('profiles').select('nickname, avatar_url').eq('id', d.user_id).maybeSingle();
+                    if (profile) {
+                        if(d.user_id === window.currentUser?.id) authorName = profile.nickname + ' (我)';
+                        else authorName = profile.nickname;
+                        if(profile.avatar_url) avatarUrl = profile.avatar_url;
+                    }
+                } catch (e) { /* 忽略 */ }
+                
                 card.innerHTML = `
-                    <div style="display:flex;justify-content:space-between;">
-                        <span><strong style="color:var(--rose-dark);">${authorName}</strong> <span style="font-size:2rem;">${d.mood||'🥰'}</span></span>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <span style="cursor:pointer;" onclick="showProfile('${d.user_id}')">
+                                <img src="${avatarUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;background:#f0d3d5;" />
+                            </span>
+                            <span><strong style="color:var(--rose-dark);font-size:1.1rem;">${authorName}</strong> <span style="font-size:1.5rem;">${d.mood||'🥰'}</span></span>
+                        </div>
                         <small>${new Date(d.created_at).toLocaleString()}</small>
                     </div>
                     <p style="white-space:pre-wrap;margin:8px 0;">${d.content||''}</p>
                     ${filesHtml ? `<div style="display:flex;flex-wrap:wrap;gap:4px;">${filesHtml}</div>` : ''}
+                    ${(d.weather_beijing || d.weather_shanghai) ? `
+                    <div style="margin-top:10px;font-size:0.8rem;color:var(--text-medium);background:rgba(255,255,255,0.3);padding:6px 10px;border-radius:8px;display:flex;justify-content:space-between;">
+                        <span>☀️ 北京 · ${d.weather_beijing||'未记录'}</span>
+                        <span>🌧️ 上海 · ${d.weather_shanghai||'未记录'}</span>
+                    </div>` : ''}                    
                     <div style="text-align:right;margin-top:10px;">
                         <button class="btn btn-sm btn-outline edit-btn" data-id="${d.id}">✏️ 编辑</button>
                         <button class="btn btn-sm" style="background:#f0d3d5;" data-id="${d.id}">🗑️ 删除</button>
@@ -2048,8 +2086,49 @@
                 }
             }, 30000);
         }
+
+        // ================================================================
+        //  模块二十三：个人主页展示
+        // ================================================================
+        async function showProfile(targetUserId) {
+            const modal = document.getElementById('profileModal');
+            const container = document.getElementById('profileContent');
+            modal.style.display = 'flex';
+        
+            // 1. 获取个人信息
+            const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', targetUserId).single();
+            
+            // 2. 计算统计信息
+            const uid = targetUserId;
+            const { count: diaryCount } = await supabaseClient.from('diaries').select('*', { count: 'exact', head: true }).eq('user_id', uid).eq('is_private', false);
+            const { count: checkinCount } = await supabaseClient.from('checkins').select('*', { count: 'exact', head: true }).eq('user_id', uid).eq('is_private', false);
+            const { count: taskCount } = await supabaseClient.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', uid).eq('is_private', false);
+            
+            const isSelf = targetUserId === window.currentUser.id;
+            
+            container.innerHTML = `
+                <div style="text-align:center;">
+                    <img src="${profile?.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--rose-light);" />
+                    <h2 style="color:var(--rose-dark);margin:10px 0 4px;">${profile?.nickname || '未命名'}</h2>
+                    <p style="color:var(--text-medium);font-size:0.9rem;">${profile?.bio || '这个人很懒，什么都没留下'}</p>
+                    <div style="margin:20px 0;display:flex;justify-content:space-around;border-top:1px solid #f0d3d5;padding-top:15px;">
+                        <div><strong>${diaryCount||0}</strong><br><span style="font-size:0.8rem;color:var(--text-medium);">公开日记</span></div>
+                        <div><strong>${checkinCount||0}</strong><br><span style="font-size:0.8rem;color:var(--text-medium);">公开打卡</span></div>
+                        <div><strong>${taskCount||0}</strong><br><span style="font-size:0.8rem;color:var(--text-medium);">公开任务</span></div>
+                    </div>
+                    ${isSelf ? `<p style="color:var(--text-medium);font-size:0.75rem;background:#f9f0ed;padding:8px;border-radius:12px;">🔒 你可以修改个人资料</p>` : ''}
+                </div>
+            `;
+        }  
         
         initApp();
     </script>
+    <!-- 🏠 个人主页弹窗 -->
+    <div id="profileModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);z-index:99999;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:24px;padding:30px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;position:relative;">
+            <button onclick="document.getElementById('profileModal').style.display='none'" style="position:absolute;top:15px;right:15px;background:none;border:none;font-size:1.5rem;cursor:pointer;">✕</button>
+            <div id="profileContent"></div>
+        </div>
+    </div>    
 </body>
 </html>
