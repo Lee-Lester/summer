@@ -1890,9 +1890,9 @@
             setupGallery();
             refreshAll();
             setupHeartButton();
-            setupSlideshow();
+           
             setupVoiceRecorder();
-            
+            setupMoney();
         }
 
         // ============================================================
@@ -2045,7 +2045,8 @@
                         checkin: loadCheckins,
                         wishes: loadWishes,
                         tasks: loadTasks,
-                        messages: loadMessages
+                        messages: loadMessages,
+                        money: loadTransactions
                     };
                     if (map[t.dataset.tab]) map[t.dataset.tab]();
                 });
@@ -3541,7 +3542,7 @@
             loadWishes();
             loadTasks();
             loadMessages();
-          
+            loadTransactions();
         }
 
         // ============================================================
