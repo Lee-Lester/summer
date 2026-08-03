@@ -849,7 +849,7 @@
                 }
                 const mood = document.querySelector('.mood.selected')?.dataset.mood || '🥰';
                 const content = document.getElementById('diaryContent').value.trim();
-                const isPrivate = false; // 未来可增加开关
+                const isPrivate = false;
                 if (!content && !pendingFiles.length && !recordedBlob) {
                     alert('写点什么吧～');
                     return;
@@ -873,21 +873,27 @@
                     voiceDuration = recordingSeconds;
                 }
                 const diary = { mood, content, files: uploadedFiles, voice_url: voiceUrl, voice_path: voicePath, voice_duration: voiceDuration, user_id: uid, is_private: isPrivate };
+                
+                let newDiaryId = null;
                 if (currentEditId) {
                     await supabaseClient.from('diaries').update(diary).eq('id', currentEditId);
+                    newDiaryId = currentEditId;
                 } else {
-                    await supabaseClient.from('diaries').insert([diary]);
-                    // 发送通知（公开日记）
-                    if (!isPrivate) {
-                        const targetId = uid === '你的UUID1' ? '你的UUID2' : '你的UUID1';
-                        await supabaseClient.from('notifications').insert({
-                            user_id: targetId,
-                            type: 'diary',
-                            message: `Ta写了一篇新日记：“${content.slice(0,20)}…”`,
-                            source_id: diary.id // 但这里还没获取到ID，可以重新查询或使用生成的ID
-                        });
-                    }
+                    const { data: insertedData, error } = await supabaseClient.from('diaries').insert([diary]).select('id');
+                    if (error) { alert('保存日记失败: ' + error.message); return; }
+                    newDiaryId = insertedData[0].id;
                 }
+
+                if (!isPrivate && newDiaryId) {
+                    const targetId = uid === '5297b0e6-f74c-49a4-8a93-c528734f93b8' ? 'cec4c9cb-9f6d-4d45-a5de-6845951b3709' : '5297b0e6-f74c-49a4-8a93-c528734f93b8';
+                    await supabaseClient.from('notifications').insert({
+                        user_id: targetId,
+                        type: 'diary',
+                        message: `Ta写了一篇新日记：“${content.slice(0,20)}…”`,
+                        source_id: newDiaryId
+                    });
+                }
+
                 resetDiaryForm();
                 await loadDiaries();
             } catch (err) {
