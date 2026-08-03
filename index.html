@@ -1182,9 +1182,12 @@
             loadDiaries(); loadCheckins(); loadWishes(); loadTasks(); loadMessages(); loadTransactions();
         }
 
-        // ==================== 粒子背景 ====================
+        // ==================== 粒子背景 & 女朋友浪漫画像 ====================
         const bgCanvas = document.getElementById('particleCanvas'), bgCtx = bgCanvas.getContext('2d');
         let bgParticles = [];
+        // ===== 女朋友画像相关变量 =====
+        let girlImageLoaded = false, girlImage = null, girlParticles = [], isNightMode = false;
+        
         class BgParticle {
             constructor() { this.reset(true); }
             reset(init) {
@@ -1202,20 +1205,165 @@
         function resizeBgCanvas() {
             bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight;
             while(bgParticles.length<80) bgParticles.push(new BgParticle());
+            if (isNightMode && girlImageLoaded) { // 窗口缩放时，重置并重新生成女朋友画像
+                girlParticles = [];
+                if(girlParticles.length === 0) generateGirlParticles(); 
+            }
         }
+        
+        // ===== 生成女朋友动态粒子画像的核心逻辑 =====
+        function generateGirlParticles() {
+            if (!girlImageLoaded || !girlImage.complete) return;
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+            // 压缩到 200x300 进行像素采样（保证高性能）
+            const width = 200, height = 300;
+            tempCanvas.width = width; tempCanvas.height = height;
+            tempCtx.drawImage(girlImage, 0, 0, width, height);
+            const imageData = tempCtx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            const newParticles = [];
+            const sampleStep = 2; // 步长，值越小越细腻
+        
+            for (let y = 0; y < height; y += sampleStep) {
+                for (let x = 0; x < width; x += sampleStep) {
+                    const i = (y * width + x) * 4;
+                    const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+                    if (a < 128) continue; // 忽略透明
+                    const brightness = (r + g + b) / 3;
+                    if (brightness < 15) continue; // 忽略过暗缝隙
+        
+                    // === 【核心】过滤瓷砖背景（只提取女生衣服和头发） ===
+                    // 原图瓷砖背景颜色偏米黄/褐色 (R:160~210, G:130~180, B:110~160)
+                    const isBackground = (r > 145 && r < 215 && g > 125 && g < 185 && b > 105 && b < 165);
+                    if (isBackground) continue; 
+        
+                    // 实际画布坐标
+                    const targetX = (x / width) * bgCanvas.width;
+                    const targetY = (y / height) * bgCanvas.height;
+        
+                    let color, size, glow;
+                    if (r > 200 && g > 180 && b > 180) { 
+                        // 1. 白色毛领、浅粉色旗袍 -> 浪漫柔光大粒子
+                        color = `rgba(255, 200, 210, 0.9)`;
+                        size = 3.5 + Math.random() * 2.5;
+                        glow = true;
+                    } else if (r < 60 && g < 50 && b < 50) { 
+                        // 2. 黑色短发 -> 细腻深色小粒子
+                        color = `rgba(45, 35, 40, 0.8)`;
+                        size = 1.5 + Math.random() * 1.5;
+                        glow = false;
+                    } else { 
+                        // 3. 脸部肤色 -> 温暖柔和粒子
+                        color = `rgba(255, 210, 190, 0.8)`;
+                        size = 2.5 + Math.random() * 2;
+                        glow = true;
+                    }
+                    newParticles.push({
+                        x: Math.random()*bgCanvas.width, y: Math.random()*bgCanvas.height,
+                        targetX: targetX, targetY: targetY,
+                        color: color, size: size, glow: glow, alpha: 0.6 + Math.random() * 0.4,
+                    });
+                }
+            }
+            newParticles.sort(() => Math.random() - 0.5);
+            girlParticles = newParticles.slice(0, 3500); // 控制在3500个以内，绝不影响性能
+        }
+        
+        // ===== 修改后的昼夜切换逻辑 =====
+        function checkLateNight() {
+            const hour = new Date().getHours();
+            isNightMode = (hour >= 19 || hour < 6); // 19点到次日6点为夜晚
+            const p = document.getElementById('homeSubtitle');
+            if (!p) return;
+        
+            if (isNightMode) { // 夜晚模式
+                p.textContent = '夜深了，星星在说我想你 🌙'; p.style.color='#c0b9dd';
+                document.body.style.background = 'linear-gradient(170deg, #1a1c2b 0%, #2d1f3d 40%, #1e2a38 80%)';
+                document.documentElement.style.setProperty('--rose','#a78bfa');
+                document.documentElement.style.setProperty('--rose-dark','#7c3aed');
+                document.documentElement.style.setProperty('--rose-light','#312e81');
+                document.documentElement.style.setProperty('--text-dark','#e0d7fe');
+                document.documentElement.style.setProperty('--text-medium','#a5b4fc');
+        
+                // 夜间触发生成女朋友粒子（如果照片加载好且还没生成）
+                if (girlImageLoaded && girlParticles.length === 0) generateGirlParticles();
+            } else { // 白天模式
+                p.textContent = '遇见你，是小亮此生意外的美好 ✨'; p.style.color='var(--text-medium)';
+                document.body.style.background = 'linear-gradient(170deg, #fef5f0 0%, #fce8e6 20%, #fdf0ed 40%, #fef6f2 60%, #fbe9e7 80%)';
+                document.documentElement.style.setProperty('--rose','#e8878a');
+                document.documentElement.style.setProperty('--rose-dark','#c96b6e');
+                document.documentElement.style.setProperty('--rose-light','#f9e0de');
+                document.documentElement.style.setProperty('--text-dark','#4a3335');
+                document.documentElement.style.setProperty('--text-medium','#7a5c5e');
+                girlParticles = []; // 白天清除人物画像
+            }
+        }
+        
+        // ===== 加载女朋友照片的函数 =====
+        function loadGirlPortrait() {
+            girlImage = new Image();
+            girlImage.crossOrigin = "Anonymous"; 
+            girlImage.onload = () => {
+                girlImageLoaded = true;
+                if (isNightMode) generateGirlParticles(); // 如果加载成功时已经是晚上，直接生成
+            };
+            girlImage.onerror = () => { girlImageLoaded = false; }; // 加载失败则放弃，不影响原程序粒子背景
+            // ⚠️ 这里必须改成你刚才第一步保存的照片名字！！！
+            girlImage.src = "./yaoyao_night.jpg"; 
+        }
+        
+        // ===== 修改后的动画循环 =====
         function animateBg() {
-            bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height);
-            bgParticles.forEach(p => { p.update(); p.draw(bgCtx); });
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            // 夜间模式下，展示女朋友画像粒子
+            if (isNightMode && girlParticles.length > 0) {
+                bgCtx.shadowBlur = 12; bgCtx.shadowColor = 'rgba(255, 150, 180, 0.4)';
+                girlParticles.forEach(p => {
+                    // 向目标位置缓动 + 微呼吸颤动（栩栩如生）
+                    p.x += (p.targetX - p.x) * 0.03 + Math.sin(Date.now() / 4000 + p.targetX) * 0.15;
+                    p.y += (p.targetY - p.y) * 0.03 + Math.cos(Date.now() / 4000 + p.targetY) * 0.15;
+                    bgCtx.globalAlpha = p.alpha;
+                    bgCtx.fillStyle = p.color;
+                    bgCtx.shadowBlur = p.glow ? 15 : 0;
+                    bgCtx.beginPath(); bgCtx.arc(p.x, p.y, p.size, 0, Math.PI*2); bgCtx.fill();
+                });
+                bgCtx.shadowBlur = 0;
+            } else {
+                // 白天或没照片时，使用常规粉色粒子
+                bgParticles.forEach(p => { p.update(); p.draw(bgCtx); });
+            }
             requestAnimationFrame(animateBg);
         }
+        
+        // ===== 修改 initApp 以加载照片 =====
+        async function initApp() {
+            const session = await checkAuth(); if(!session) return;
+            window.currentUser = session.user;
+            document.getElementById('app').classList.add('visible');
+            updateTimer(); setInterval(updateTimer, 1000);
+            checkLateNight(); setInterval(checkLateNight, 60000);
+            loadHearts();
+            setupSceneSwitch(); setupTabs(); setupDiary(); setupCheckin(); setupWishes(); setupTasks(); setupMessages(); setupVoiceRecorder(); setupMoney();
+            setupHeartButton();
+            refreshAll();
+            
+            // ⚠️【关键新增】在初始化时，预加载女朋友照片
+            loadGirlPortrait(); 
+            
+            supabaseClient.auth.onAuthStateChange((event, session) => { if(event==='SIGNED_OUT'||!session) { document.getElementById('app').classList.remove('visible'); showLoginModal('登录已失效'); } });
+            setInterval(async () => { const { data: { session } } = await supabaseClient.auth.getSession(); if(!session) { document.getElementById('app').classList.remove('visible'); showLoginModal('会话已过期'); } }, 30000);
+        }
+        
+        // ===== 监听窗口缩放事件（防止换屏后画像偏移）=====
         window.addEventListener('resize', resizeBgCanvas);
         resizeBgCanvas(); animateBg();
-
+        
         // 退出登录
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             if(confirm('确定退出吗？')) { await supabaseClient.auth.signOut(); location.reload(); }
         });
-
+        
         initApp();
     </script>
 </body>
