@@ -148,7 +148,7 @@
         .reply-box input{border:1px solid #f0d3d5!important;border-radius:20px;padding:6px 12px;}
         .reply-box button{background:var(--rose);color:white;border:none;border-radius:20px;padding:6px 16px;cursor:pointer;}
 
-        /* ===== 🌙 夜间模式高对比度覆盖补丁 ===== */
+        /* ===== 🌙 夜间模式高对比度覆盖补丁 ===== */    
         body.night-mode textarea,
         body.night-mode input[type="text"],
         body.night-mode input[type="date"],
@@ -178,6 +178,59 @@
         }
         body.night-mode .mood {
             filter: grayscale(0.3) brightness(1.2);
+        }
+         /* ===== 🌙 夜间模式高对比度覆盖补丁（补充） ===== */
+        /* 已存在的 body.night-mode 补丁保持不变 ... 追加以下内容 */
+
+        /* 留言气泡 */
+        body.night-mode .msg-bubble {
+            background: rgba(40, 40, 55, 0.9) !important;
+            color: #e0d7fe !important;
+            border-left-color: #7c3aed !important;
+        }
+        body.night-mode .msg-bubble strong {
+            color: #a78bfa !important;
+        }
+        body.night-mode .msg-bubble small {
+            color: #a5b4fc !important;
+        }
+
+        /* 打卡日历容器及内部格子 */
+        body.night-mode #checkinCalendarContainer > div {
+            background: rgba(30, 30, 45, 0.8) !important;
+            color: #e0d7fe !important;
+        }
+        body.night-mode #checkinCalendarContainer [data-date] {
+            background: rgba(50, 50, 70, 0.4) !important;
+            color: #e0d7fe !important;
+        }
+        /* 保留已完成的打卡特殊颜色，确保深背景下依然清晰 */
+        body.night-mode #checkinCalendarContainer [data-date] span {
+            color: #e0d7fe !important;
+        }
+        body.night-mode #checkinCalendarContainer [data-date] [style*="background:#fce8e6"] {
+            background: rgba(120, 60, 200, 0.6) !important;
+        }
+        body.night-mode #checkinCalendarContainer [data-date] [style*="background:#fdf5f3"] {
+            background: rgba(180, 100, 200, 0.4) !important;
+        }
+
+        /* 列表项（打卡、任务、心愿）的边框与符号 */
+        body.night-mode .check-item,
+        body.night-mode .task-item,
+        body.night-mode .wish-item {
+            border-bottom-color: #4a4a6a !important;
+        }
+        body.night-mode .check-star,
+        body.night-mode .wish-star,
+        body.night-mode .task-status {
+            color: #e0d7fe !important;
+        }
+        
+        /* 文件预览区 */
+        body.night-mode .preview-item {
+            background: rgba(40, 40, 55, 0.8) !important;
+            border-color: #4a4a6a !important;
         }
     </style>
 </head>
@@ -925,7 +978,10 @@
             const currentVal = selectEl.value;
             selectEl.innerHTML = '<option value="">-- 请选择 --</option>';
             if (!data?.length) {
+                // 🛡️ 没有数据时，把选中的项目ID彻底清空，避免残留
+                selectedCheckinId = null; 
                 document.getElementById('checkinCalendarContainer').innerHTML = '<p>还没有打卡项目</p>';
+                document.getElementById('checkinList').innerHTML = '';
                 return;
             }
             data.forEach(c => {
@@ -981,6 +1037,9 @@
             document.querySelectorAll('#checkinCalendarContainer [data-date]').forEach(el => {
                 let timer;
                 const dateStr = el.dataset.date, taskId = el.dataset.taskId, type = el.dataset.type;
+                // 🛡️ 傻人保护措施：如果检测到无效的任务ID，直接跳过不绑任何点击，杜绝 400 报错
+                if (!taskId || taskId === 'undefined' || taskId === 'null') return;
+                
                 const start = () => {
                     timer = setTimeout(() => {
                         if (confirm('确定取消这一天的打卡吗？')) cancelCheckin(taskId, dateStr, type);
