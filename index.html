@@ -1757,7 +1757,51 @@
                 await loadMessages();
             };
         }
+        // ----- 缺失的核心函数：loadMessages 及树形渲染 -----
+        function buildMessageTree(messages) {
+            const map = {}, roots = [];
+            messages.forEach(m => map[m.id] = { ...m, children: [] });
+            messages.forEach(m => m.parent_id && map[m.parent_id] ? map[m.parent_id].children.push(map[m.id]) : roots.push(map[m.id]));
+            return roots;
+        }
 
+        function renderMessageTree(messages, container, depth = 0) {
+            messages.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'msg-bubble';
+                div.style.marginLeft = depth * 16 + 'px';
+                div.innerHTML = `<div><strong>${m.author}</strong> <small>${new Date(m.created_at).toLocaleString()}</small></div><p>${m.text}</p>
+                    <button class="reply-btn" data-id="${m.id}">💬 回复</button>
+                    <div class="reply-box"><input type="text" placeholder="写回复…" /><button class="submit-reply">发送</button></div>
+                    <div class="replies"></div>`;
+                container.appendChild(div);
+                div.querySelector('.reply-btn').onclick = () => {
+                    const box = div.querySelector('.reply-box');
+                    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+                };
+                div.querySelector('.submit-reply').onclick = async () => {
+                    const input = div.querySelector('.reply-box input');
+                    const text = input.value.trim();
+                    if (!text) return;
+                    const author = await chooseAuthor();
+                    await supabaseClient.from('messages').insert({ text, author, parent_id: m.id, likes: 0, liked_by: [], user_id: window.currentUser.id });
+                    input.value = '';
+                    div.querySelector('.reply-box').style.display = 'none';
+                    await loadMessages();
+                };
+                if (m.children?.length) renderMessageTree(m.children, div.querySelector('.replies'), depth + 1);
+            });
+        }
+
+        async function loadMessages() {
+            const container = document.getElementById('msgList');
+            const { data } = await supabaseClient.from('messages').select('*').order('created_at', { ascending: false }).limit(100);
+            const tree = buildMessageTree(data || []);
+            container.innerHTML = '';
+            if (!tree.length) container.innerHTML = '<p style="text-align:center;">还没有留言 💌</p>';
+            else renderMessageTree(tree, container);
+        }
+        
         // ================================================================
         //  模块十七：私房钱记账
         // ================================================================
